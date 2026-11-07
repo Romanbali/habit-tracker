@@ -4,59 +4,103 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#10131a">
-<meta name="description" content="Мой простой трекер привычек">
+<meta name="description" content="Календарь привычек и ежедневных целей">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>Мои привычки</title>
+<title>Habit Space — календарь</title>
 <style>
 :root{color-scheme:dark;--bg:#10131a;--panel:#191e28;--panel2:#222938;--text:#f4f6fb;--muted:#9ba6b8;--line:#30394a;--accent:#9ee6bd;--accentText:#10251a;--danger:#ff9a9a}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1d2930 0,var(--bg) 52%);color:var(--text);font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
-main{max-width:620px;margin:0 auto;padding:28px 0 48px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.brand{font-size:13px;letter-spacing:.16em;color:var(--muted);font-weight:700}.date{font-size:13px;color:var(--muted)}h1{font-size:clamp(30px,8vw,42px);line-height:1.05;letter-spacing:-.04em;margin:0 0 8px}.sub{color:var(--muted);margin:0 0 24px}.card{background:rgba(25,30,40,.94);border:1px solid var(--line);border-radius:22px;padding:18px;margin:16px 0;box-shadow:0 12px 35px #0002}.progress-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.progress-head strong{font-size:15px}.percent{color:var(--accent);font-weight:700}.track{height:9px;border-radius:99px;background:#30394a;overflow:hidden}.fill{height:100%;background:var(--accent);border-radius:99px;width:0;transition:width .2s}.small{font-size:12px;color:var(--muted);margin-top:9px}.section-head{display:flex;align-items:center;justify-content:space-between;margin:26px 2px 12px}.section-head h2{font-size:18px;margin:0}.habit-list{display:grid;gap:10px}.habit{display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:14px;min-width:0}.emoji{width:42px;height:42px;display:grid;place-items:center;background:var(--panel2);border-radius:13px;font-size:22px;flex:none}.habit-info{flex:1;min-width:0}.habit-name{font-weight:650;overflow-wrap:anywhere}.habit-meta{font-size:12px;color:var(--muted);margin-top:2px}.check{width:38px;height:38px;border-radius:50%;border:1px solid #526074;background:transparent;color:transparent;font-size:20px;cursor:pointer;flex:none}.check.done{background:var(--accent);border-color:var(--accent);color:var(--accentText)}button,input{font:inherit}.add{display:flex;gap:8px;margin-top:12px}.add input{min-width:0;flex:1;background:var(--panel);border:1px solid var(--line);border-radius:13px;color:var(--text);padding:13px 14px;outline:none}.add input:focus{border-color:var(--accent)}.primary,.secondary{border:0;border-radius:13px;padding:12px 15px;font-weight:700;cursor:pointer}.primary{background:var(--accent);color:var(--accentText)}.secondary{background:var(--panel2);color:var(--text)}.week{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}.day{background:var(--panel2);border-radius:12px;text-align:center;padding:9px 2px;font-size:11px;color:var(--muted)}.day b{display:block;color:var(--text);font-size:14px;margin-top:3px}.day.today{outline:1px solid var(--accent)}.tools{display:flex;gap:8px;flex-wrap:wrap}.tools button{flex:1}.empty{color:var(--muted);text-align:center;padding:24px 10px;border:1px dashed var(--line);border-radius:16px}.foot{color:var(--muted);font-size:11px;text-align:center;margin-top:25px} .remove{background:none;border:0;color:var(--muted);font-size:18px;padding:5px;cursor:pointer}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1d2930 0,var(--bg) 52%);color:var(--text);font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 15px env(safe-area-inset-bottom)}
+main{max-width:650px;margin:0 auto;padding:24px 0 42px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.brand{font-size:12px;letter-spacing:.16em;color:var(--muted);font-weight:800}.date{font-size:12px;color:var(--muted)}h1{font-size:clamp(29px,8vw,39px);line-height:1.05;letter-spacing:-.04em;margin:0 0 7px}.sub{color:var(--muted);margin:0 0 20px;font-size:14px}.card{background:rgba(25,30,40,.96);border:1px solid var(--line);border-radius:20px;padding:16px;margin:13px 0;box-shadow:0 12px 35px #0002}.section-head{display:flex;align-items:center;justify-content:space-between;margin:23px 2px 10px}.section-head h2{font-size:17px;margin:0}.muted{color:var(--muted)}.monthbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.monthbar strong{font-size:16px;text-transform:capitalize}.nav{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;width:38px;height:36px;font-size:20px}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.weekday{text-align:center;color:var(--muted);font-size:11px;padding:3px 0 7px}.calday{min-height:48px;border:1px solid transparent;border-radius:11px;background:var(--panel2);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:inherit;padding:4px 1px}.calday.out{opacity:.28}.calday.selected{border-color:var(--accent);background:#263b34}.calday.today:not(.selected){border-color:#66788c}.calday .num{font-size:13px}.dots{height:5px;display:flex;gap:2px}.dots i{width:4px;height:4px;border-radius:50%;background:var(--accent)}.selectedline{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:13px 1px 0;font-size:13px}.todaybtn{border:0;background:none;color:var(--accent);font-weight:700;font-size:12px}.habit{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:14px;margin:9px 0}.habithead{display:flex;align-items:center;gap:11px}.emoji{width:40px;height:40px;display:grid;place-items:center;background:var(--panel2);border-radius:12px;font-size:21px;flex:none}.habitinfo{flex:1;min-width:0}.habitname{font-weight:750}.habitmeta{font-size:12px;color:var(--muted);margin-top:2px}.status{font-size:11px;color:var(--accent);font-weight:700}.inputs{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}.field label{display:block;font-size:11px;color:var(--muted);margin:0 0 5px}.field input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:11px;color:var(--text);padding:10px;font:inherit;font-size:15px;min-width:0}.field input:focus{outline:1px solid var(--accent)}.actions{display:flex;gap:8px;margin-top:10px}.btn{border:0;border-radius:11px;padding:10px 13px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.primary{background:var(--accent);color:var(--accentText);flex:1}.secondary{background:var(--panel2);color:var(--text)}.hint{font-size:11px;color:var(--muted);margin-top:10px}.progress{height:7px;background:#30394a;border-radius:99px;overflow:hidden;margin-top:9px}.fill{height:100%;background:var(--accent);width:0}.tools{display:flex;gap:8px;flex-wrap:wrap}.tools button{flex:1}.foot{text-align:center;color:var(--muted);font-size:11px;margin-top:22px}
+@media(min-width:520px){.calday{min-height:58px}.inputs{grid-template-columns:1fr 1fr 1fr}}
 </style>
 </head>
-<body>
-<main>
- <div class="top"><div class="brand">HABIT SPACE</div><div class="date" id="todayLabel"></div></div>
- <h1>Маленькие шаги.<br>Большие перемены.</h1>
- <p class="sub">Отмечай привычки — и замечай свой прогресс.</p>
- <section class="card">
-  <div class="progress-head"><strong>Прогресс за сегодня</strong><span class="percent" id="percent">0%</span></div>
-  <div class="track"><div class="fill" id="fill"></div></div>
-  <div class="small" id="progressText">0 из 0 привычек выполнено</div>
- </section>
- <div class="section-head"><h2>Мои привычки</h2><span class="date" id="countLabel"></span></div>
- <div class="habit-list" id="habits"></div>
- <form class="add" id="addForm"><input id="newHabit" maxlength="48" placeholder="Например, читать 10 минут" aria-label="Новая привычка"><button class="primary" type="submit">Добавить</button></form>
- <div class="section-head"><h2>Последние 7 дней</h2></div>
- <section class="card"><div class="week" id="week"></div><div class="small">Число показывает, сколько привычек ты выполнил(а) за день.</div></section>
- <div class="section-head"><h2>Мои данные</h2></div>
- <section class="card"><div class="tools"><button class="secondary" id="exportBtn">Экспорт копии</button><button class="secondary" id="importBtn">Импорт копии</button><input id="importFile" type="file" accept="application/json" hidden></div><div class="small">Прогресс хранится в этом браузере на этом устройстве. Сохраняй резервную копию время от времени.</div></section>
- <div class="foot">Твои привычки. Твой темп. Данные остаются на твоём устройстве.</div>
+<body><main>
+<div class="top"><div class="brand">HABIT SPACE</div><div class="date" id="todayLabel"></div></div>
+<h1>Планируй день.<br>Держи свой ритм.</h1>
+<p class="sub">Выбери дату в календаре, задай цель и запиши результат.</p>
+<section class="card">
+ <div class="monthbar"><button class="nav" id="prev" aria-label="Предыдущий месяц">‹</button><strong id="monthTitle"></strong><button class="nav" id="next" aria-label="Следующий месяц">›</button></div>
+ <div class="calendar" id="calendar"></div>
+ <div class="selectedline"><span id="selectedLabel"></span><button class="todaybtn" id="goToday">К сегодняшнему дню</button></div>
+</section>
+<div class="section-head"><h2>Цели на выбранный день</h2><span class="date" id="dayProgress"></span></div>
+<div id="habits"></div>
+<div class="hint">Измени поле «Цель» — новое значение сохранится только для выбранной даты. Фактический результат записывается отдельно.</div>
+<div class="section-head"><h2>Резервная копия</h2></div>
+<section class="card"><div class="tools"><button class="btn secondary" id="exportBtn">Экспорт данных</button><button class="btn secondary" id="importBtn">Импорт данных</button><input id="importFile" type="file" accept="application/json" hidden></div><div class="hint">Все данные хранятся локально в браузере на этом устройстве. Экспортируй копию, чтобы не потерять историю.</div></section>
+<div class="foot">Твои привычки. Твои цели. Твой прогресс.</div>
 </main>
 <script>
 const KEY='habit-space-v1';
-const defaults=[{id:'1',name:'Выпить стакан воды',emoji:'💧'},{id:'2',name:'Почитать 10 минут',emoji:'📚'},{id:'3',name:'Прогуляться',emoji:'🚶'}];
-let state;
-try{state=JSON.parse(localStorage.getItem(KEY))||{habits:defaults,done:{}}}catch{state={habits:defaults,done:{}}}
-const $=id=>document.getElementById(id);
-const iso=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
-const today=iso(new Date());
-const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
-const isDone=(id,day=today)=>(state.done[day]||[]).includes(id);
-function render(){
- $('todayLabel').textContent=new Intl.DateTimeFormat('ru-RU',{weekday:'short',day:'numeric',month:'long'}).format(new Date());
- const completed=state.habits.filter(h=>isDone(h.id)).length,total=state.habits.length,pct=total?Math.round(completed/total*100):0;
- $('percent').textContent=pct+'%';$('fill').style.width=pct+'%';$('progressText').textContent=completed+' из '+total+' привычек выполнено';$('countLabel').textContent=total+' всего';
- const list=$('habits');list.innerHTML='';
- if(!total){list.innerHTML='<div class="empty">Пока нет привычек. Добавь первую ниже ✨</div>'}
- state.habits.forEach(h=>{const row=document.createElement('div');row.className='habit';const emoji=document.createElement('div');emoji.className='emoji';emoji.textContent=h.emoji||'✨';const info=document.createElement('div');info.className='habit-info';const name=document.createElement('div');name.className='habit-name';name.textContent=h.name;const meta=document.createElement('div');meta.className='habit-meta';meta.textContent=isDone(h.id)?'Сегодня выполнено — молодец!':'Отметь, когда выполнишь';info.append(name,meta);const check=document.createElement('button');check.className='check'+(isDone(h.id)?' done':'');check.textContent='✓';check.setAttribute('aria-label','Отметить '+h.name);check.onclick=()=>{const a=state.done[today]||[];state.done[today]=isDone(h.id)?a.filter(x=>x!==h.id):[...a,h.id];save();render()};const del=document.createElement('button');del.className='remove';del.textContent='×';del.title='Удалить привычку';del.onclick=()=>{if(confirm('Удалить привычку «'+h.name+'»? История её отметок тоже будет удалена.')){state.habits=state.habits.filter(x=>x.id!==h.id);Object.keys(state.done).forEach(k=>state.done[k]=state.done[k].filter(x=>x!==h.id));save();render()}};row.append(emoji,info,check,del);list.append(row)});
- const week=$('week');week.innerHTML='';for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=iso(d),n=(state.done[key]||[]).length;const cell=document.createElement('div');cell.className='day'+(key===today?' today':'');cell.innerHTML='<span>'+new Intl.DateTimeFormat('ru-RU',{weekday:'short'}).format(d)+'</span><b>'+n+'</b>';week.append(cell)}
+const today=new Date();today.setHours(0,0,0,0);
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fromISO=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const day0=iso(today);
+const seed=[
+ {id:'trading',name:'Трейдинг',emoji:'💵',unit:'$',base:30,schedule:[{from:'2026-11-13',value:15},{from:'2026-11-16',value:20}]},
+ {id:'pushups',name:'Отжимания',emoji:'💪',unit:'раз',base:30,schedule:[{from:'2026-11-13',value:15},{from:'2026-11-16',value:20}]},
+ {id:'meditation',name:'Медитация',emoji:'🧘',unit:'мин',base:1,schedule:[]}
+];
+let state;try{state=JSON.parse(localStorage.getItem(KEY))}catch{}
+if(!state||!Array.isArray(state.habits)){
+ state={habits:seed,done:{},goals:{},actual:{}};
+}else{
+ state.done=state.done||{};state.goals=state.goals||{};state.actual=state.actual||{};
+ const starter=state.habits.length===3&&state.habits.some(h=>['Выпить стакан воды','Почитать 10 минут','Прогуляться'].includes(h.name));
+ if(starter){state.habits=seed;state.done={};}
+ else{
+  seed.forEach(s=>{if(!state.habits.some(h=>h.id===s.id))state.habits.push(s)});
+  state.habits=state.habits.map(h=>{const s=seed.find(x=>x.id===h.id);return s?{...s,...h,schedule:s.schedule}:h});
+ }
 }
-$('addForm').addEventListener('submit',e=>{e.preventDefault();const name=$('newHabit').value.trim();if(!name)return;state.habits.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),name,emoji:'✨'});$('newHabit').value='';save();render()});
-$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='habit-tracker-backup.json';a.click();URL.revokeObjectURL(a.href)};
+let selected=day0;
+let month=new Date(today.getFullYear(),today.getMonth(),1);
+const $=id=>document.getElementById(id);
+const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+function goalFor(h,day){if(state.goals[day]&&state.goals[day][h.id]!=null)return Number(state.goals[day][h.id]);let v=h.base||1;(h.schedule||[]).forEach(s=>{if(day>=s.from)v=s.value});return v}
+function actualFor(h,day){return Number(state.actual[day]?.[h.id]||0)}
+function isDone(h,day){return actualFor(h,day)>=goalFor(h,day)&&actualFor(h,day)>0}
+function fmt(d,opts){return new Intl.DateTimeFormat('ru-RU',opts).format(d)}
+function renderCalendar(){
+ $('monthTitle').textContent=fmt(month,{month:'long',year:'numeric'});
+ const first=new Date(month.getFullYear(),month.getMonth(),1),offset=(first.getDay()+6)%7;
+ const start=new Date(first);start.setDate(first.getDate()-offset);
+ const box=$('calendar');box.innerHTML='';
+ ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(w=>{const el=document.createElement('div');el.className='weekday';el.textContent=w;box.append(el)});
+ for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const key=iso(d),b=document.createElement('button');b.className='calday'+(d.getMonth()!==month.getMonth()?' out':'')+(key===selected?' selected':'')+(key===day0?' today':'');const num=document.createElement('span');num.className='num';num.textContent=d.getDate();const dots=document.createElement('span');dots.className='dots';state.habits.forEach(h=>{if(isDone(h,key)){const dot=document.createElement('i');dots.append(dot)}});b.append(num,dots);b.onclick=()=>{selected=key;if(d.getMonth()!==month.getMonth())month=new Date(d.getFullYear(),d.getMonth(),1);render()};box.append(b)}
+}
+function renderHabits(){
+ const box=$('habits');box.innerHTML='';let complete=0;
+ state.habits.forEach(h=>{
+  const target=goalFor(h,selected),actual=actualFor(h,selected),done=isDone(h,selected);if(done)complete++;
+  const card=document.createElement('section');card.className='habit';
+  const head=document.createElement('div');head.className='habithead';
+  const emoji=document.createElement('div');emoji.className='emoji';emoji.textContent=h.emoji||'✨';
+  const info=document.createElement('div');info.className='habitinfo';
+  const name=document.createElement('div');name.className='habitname';name.textContent=h.name;
+  const meta=document.createElement('div');meta.className='habitmeta';meta.textContent=done?'Цель выполнена ✓':'Цель: '+target+' '+h.unit+' · Выполнено: '+actual+' '+h.unit;
+  const status=document.createElement('div');status.className='status';status.textContent=done?'ГОТОВО':'В ПРОЦЕССЕ';
+  info.append(name,meta);head.append(emoji,info,status);
+  const inputs=document.createElement('div');inputs.className='inputs';
+  const goalField=makeField('Цель ('+h.unit+')',target);const actualField=makeField('Факт ('+h.unit+')',actual);
+  goalField.input.min='0';goalField.input.step='any';actualField.input.min='0';actualField.input.step='any';
+  goalField.input.onchange=()=>{const n=Number(goalField.input.value);if(!Number.isFinite(n)||n<0){goalField.input.value=target;return}state.goals[selected]=state.goals[selected]||{};state.goals[selected][h.id]=n;save();render()};
+  actualField.input.onchange=()=>{const n=Number(actualField.input.value);if(!Number.isFinite(n)||n<0){actualField.input.value=actual;return}state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=n;save();render()};
+  inputs.append(goalField.wrap,actualField.wrap);
+  const bar=document.createElement('div');bar.className='progress';const fill=document.createElement('div');fill.className='fill';fill.style.width=(target>0?Math.min(100,actual/target*100):0)+'%';bar.append(fill);
+  const actions=document.createElement('div');actions.className='actions';const quick=document.createElement('button');quick.className='btn primary';quick.textContent=done?'Снять выполнение':'Отметить цель выполненной';quick.onclick=()=>{state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=done?0:target;save();render()};actions.append(quick);
+  card.append(head,inputs,bar,actions);box.append(card)
+ });
+ $('dayProgress').textContent=complete+' / '+state.habits.length+' выполнено';
+}
+function makeField(label,value){const wrap=document.createElement('div');wrap.className='field';const l=document.createElement('label');l.textContent=label;const input=document.createElement('input');input.type='number';input.inputMode='decimal';input.value=value;wrap.append(l,input);return {wrap,input}}
+function render(){renderCalendar();renderHabits();$('selectedLabel').textContent=fmt(fromISO(selected),{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('todayLabel').textContent='Сегодня: '+fmt(today,{day:'numeric',month:'short'})}
+$('prev').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);renderCalendar()};
+$('next').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);renderCalendar()};
+$('goToday').onclick=()=>{selected=day0;month=new Date(today.getFullYear(),today.getMonth(),1);render()};
+$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='habit-space-backup.json';a.click();URL.revokeObjectURL(a.href)};
 $('importBtn').onclick=()=>$('importFile').click();
-$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.habits)||typeof data.done!=='object')throw Error();state=data;save();render();alert('Резервная копия восстановлена!')}catch{alert('Не удалось прочитать файл резервной копии.')}e.target.value=''};
-if('serviceWorker'in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-render();
-</script>
-</body>
-</html>
+$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.habits))throw Error();state={habits:data.habits,done:data.done||{},goals:data.goals||{},actual:data.actual||{}};save();render();alert('Данные восстановлены')}catch{alert('Не удалось прочитать копию')}e.target.value=''};
+save();render();
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script></body></html>
