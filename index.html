@@ -2,64 +2,208 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f5f4ec">
-<meta name="description" content="Октябрь — прогресс по 31 дню">
-<link rel="manifest" href="./manifest.webmanifest">
-<title>Октябрь</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4f1e9">
+<meta name="description" content="Nordic Habit — личный трекер привычек">
+<link rel="manifest" href="./manifest.webmanifest?v=9">
+<title>Nordic Habit</title>
 <style>
-:root{color-scheme:light;--bg:#f5f4ec;--ink:#493b39;--line:#b9a7a0}
+:root{color-scheme:light;--bg:#f5f4ef;--paper:#fffefa;--cream:#f2eee3;--ink:#242522;--muted:#77796f;--sage:#9aaf9d;--sage-dark:#718d78;--sage-pale:#e5ebe2;--line:#e8e5dc;--shadow:0 8px 22px rgba(45,49,39,.07)}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-main{width:min(100% - 36px,1280px);margin:0 auto;padding:52px 0}
-h1{margin:0 0 48px;font-size:clamp(27px,4vw,40px);font-weight:500;letter-spacing:-.04em}
-.scroller{width:100%;overflow-x:auto;overflow-y:hidden;padding:5px 0 14px;scrollbar-width:thin;scrollbar-color:#c9bbb4 transparent}
-.progress{position:relative;display:grid;grid-template-columns:repeat(31,minmax(24px,1fr));min-width:980px;align-items:start}
-.progress:before{content:"";position:absolute;left:12px;right:12px;top:12px;height:3px;background:var(--line)}
-.day{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0}
-.circle{display:block;width:25px;height:25px;border:3px solid #9d8983;border-radius:50%;background:var(--bg)}
-.number{font-size:14px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
-@media(min-width:1100px){.progress{min-width:0}.circle{width:27px;height:27px}.progress:before{top:13px}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+button,input{font:inherit}
+.app{max-width:520px;margin:0 auto;min-height:100vh;padding:22px 19px 30px}
+.top{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 31px}
+.brand{font-size:16px;letter-spacing:.02em;color:#252723}.brand b{font-weight:800}.brand span{font-weight:300}
+.avatar{width:37px;height:37px;border-radius:50%;background:var(--sage-pale);display:grid;place-items:center;color:var(--sage-dark);font-size:15px}
+.eyebrow{font-size:11px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+h1{font-size:31px;letter-spacing:-.045em;line-height:1.1;margin:0;font-weight:720}
+.date-row{display:flex;align-items:end;justify-content:space-between;margin-bottom:20px}
+.date-label{font-size:13px;color:var(--muted)}
+.progress-card{background:linear-gradient(145deg,#f7f3e9,#f1eee4);border:1px solid #eeeadf;border-radius:25px;padding:23px 18px 19px;text-align:center;box-shadow:var(--shadow);margin-bottom:25px}
+.progress-title{font-size:15px;font-weight:650;margin-bottom:14px}
+.ring-wrap{width:154px;height:154px;margin:0 auto 11px;position:relative}
+.ring{width:154px;height:154px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:11}
+.ring .track{stroke:#e5dfce}
+.ring .value{stroke:var(--sage);stroke-linecap:round;stroke-dasharray:408.4;stroke-dashoffset:408.4;transition:stroke-dashoffset .25s}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.percent{font-size:34px;font-weight:750;letter-spacing:-.05em}
+.ring-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.progress-caption{font-size:13px;color:#55594f}
+.balance{display:flex;align-items:center;justify-content:space-between;background:var(--paper);border:1px solid var(--line);border-radius:17px;padding:14px 15px;margin-bottom:25px;box-shadow:var(--shadow)}
+.balance-label{font-size:12px;color:var(--muted);margin-bottom:3px}
+.balance-value{font-size:23px;font-weight:750;letter-spacing:-.035em}
+.balance-note{font-size:11px;color:var(--sage-dark);margin-top:2px}
+.balance-icon{width:42px;height:42px;border-radius:14px;background:var(--sage-pale);display:grid;place-items:center;color:var(--sage-dark);font-size:21px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:0 2px 12px}
+h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
+.section-hint{font-size:11px;color:var(--muted)}
+.habits{display:grid;gap:11px}
+.habit{display:flex;align-items:center;gap:13px;background:var(--paper);border:1px solid var(--line);border-radius:19px;padding:14px 13px;box-shadow:0 5px 14px rgba(45,49,39,.045);min-height:82px}
+.habit.done{background:#eef2eb;border-color:#e1e9df}
+.habit-icon{flex:0 0 43px;width:43px;height:43px;border-radius:50%;background:#f0efe9;display:grid;place-items:center;color:#54584f}
+.habit.done .habit-icon{background:#dce6da;color:var(--sage-dark)}
+.habit-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.habit-main{min-width:0;flex:1}
+.habit-name{font-size:14px;font-weight:680;margin-bottom:4px}
+.habit-meta{font-size:11px;color:var(--muted)}
+.habit-control{display:flex;align-items:center;gap:7px}
+.amount{width:66px;border:1px solid #e6e5dc;background:#f8f8f3;border-radius:10px;padding:8px 5px;text-align:center;font-size:13px;font-weight:650;color:var(--ink);outline:none}
+.amount:focus{border-color:var(--sage-dark)}
+.unit{font-size:11px;color:var(--muted)}
+.check{width:44px;height:27px;border:0;border-radius:99px;background:#d8d9d3;padding:3px;cursor:pointer;transition:background .2s;flex:0 0 auto}
+.check:after{content:"";display:block;width:21px;height:21px;border-radius:50%;background:white;box-shadow:0 1px 3px #0002;transition:transform .2s}
+.check[aria-pressed=true]{background:var(--sage)}
+.check[aria-pressed=true]:after{transform:translateX(17px)}
+.hint{font-size:11px;color:var(--muted);line-height:1.5;margin:14px 4px 0}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:15px 0 22px}
+.week-day{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:9px 2px;text-align:center;font-size:10px;color:var(--muted)}
+.week-day b{display:block;color:var(--ink);font-size:13px;margin-top:6px}
+.week-day.today{background:var(--sage-pale);border-color:#d6e1d4}
+.stat-card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:11px}
+.stat-label{font-size:12px;color:var(--muted)}.stat-number{font-size:25px;font-weight:750;margin-top:4px}
+.profile-note{font-size:13px;color:var(--muted);line-height:1.65}
+.bottom-nav{position:fixed;z-index:5;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(255,254,250,.94);backdrop-filter:blur(16px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr)}
+.nav-btn{border:0;background:transparent;color:#77796f;display:flex;flex-direction:column;align-items:center;gap:4px;padding:3px 0;font-size:10px;cursor:pointer}
+.nav-btn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nav-btn.active{color:var(--sage-dark);font-weight:700}
+.toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%);background:#30352f;color:white;padding:10px 15px;border-radius:99px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .2s}
+@media(min-width:600px){body{padding-top:20px}.app{background:var(--bg)}}
 </style>
 </head>
 <body>
-<main>
-<h1>Октябрь</h1>
-<div class="scroller" aria-label="Прогресс за 31 день октября">
-<div class="progress">
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">1</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">2</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">3</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">4</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">5</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">6</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">7</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">8</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">9</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">10</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">11</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">12</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">13</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">14</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">15</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">16</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">17</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">18</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">19</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">20</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">21</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">22</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">23</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">24</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">25</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">26</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">27</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">28</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">29</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">30</span></div>
-<div class="day"><span class="circle" aria-hidden="true"></span><span class="number">31</span></div>
+<div class="app">
+<header class="top"><div class="brand"><b>NORDIC</b> <span>/ HABIT</span></div><div class="avatar" aria-hidden="true">✦</div></header>
+<section id="home" class="tab-panel active">
+<div class="date-row"><div><div class="eyebrow">Твой день</div><h1>Сегодня</h1></div><div class="date-label" id="todayDate"></div></div>
+<div class="progress-card">
+<div class="progress-title">Прогресс за сегодня</div>
+<div class="ring-wrap"><svg class="ring" viewBox="0 0 150 150" aria-hidden="true"><circle class="track" cx="75" cy="75" r="65"/><circle class="value" id="ringValue" cx="75" cy="75" r="65"/></svg><div class="ring-center"><div class="percent" id="percent">0%</div><div class="ring-sub">выполнено</div></div></div>
+<div class="progress-caption" id="progressCaption">0 из 3 привычек выполнено</div>
 </div>
+<div class="balance"><div><div class="balance-label">Баланс цели</div><div class="balance-value" id="balanceValue">$185</div><div class="balance-note" id="balanceNote">Стартовый баланс + выполненные дни</div></div><div class="balance-icon">↗</div></div>
+<div class="section-head"><h2>Твои привычки</h2><span class="section-hint" id="targetHint">Цели на сегодня</span></div>
+<div class="habits" id="habitList"></div>
+<p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
+</section>
+<section id="habits" class="tab-panel">
+<div class="eyebrow">Твой ритм</div><h1>Привычки</h1>
+<div class="week" id="weekStrip"></div>
+<div class="stat-card"><div class="stat-label">Текущая цель трейдинга</div><div class="stat-number" id="tradeTarget">$30</div></div>
+<div class="stat-card"><div class="stat-label">Цель отжиманий</div><div class="stat-number" id="pushTarget">30</div></div>
+<div class="stat-card"><div class="stat-label">Медитация каждый день</div><div class="stat-number">1 минута</div></div>
+<p class="profile-note">План целей меняется по датам автоматически. Отметки за прошлые дни можно просматривать, но не редактировать через этот экран.</p>
+</section>
+<section id="insights" class="tab-panel">
+<div class="eyebrow">Твой результат</div><h1>Статистика</h1>
+<div class="stat-card"><div class="stat-label">Выполнено привычек сегодня</div><div class="stat-number" id="statsToday">0 / 3</div></div>
+<div class="stat-card"><div class="stat-label">Дней с полным выполнением</div><div class="stat-number" id="statsDays">0</div></div>
+<div class="stat-card"><div class="stat-label">Текущий баланс цели</div><div class="stat-number" id="statsBalance">$185</div></div>
+</section>
+<section id="profile" class="tab-panel">
+<div class="eyebrow">Настройки</div><h1>Профиль</h1>
+<div class="stat-card"><div class="stat-label">Твой план</div><div class="stat-number">Nordic Habit</div><p class="profile-note">Три ежедневные привычки: трейдинг, отжимания и медитация. Данные хранятся локально в браузере.</p></div>
+<div class="stat-card"><button id="exportData" style="border:0;background:var(--sage-pale);color:#526b57;border-radius:12px;padding:11px 14px;font-weight:650">Экспортировать данные</button> <button id="resetData" style="border:0;background:#f3e9e5;color:#875d50;border-radius:12px;padding:11px 14px;font-weight:650">Сбросить данные</button></div>
+</section>
 </div>
-</main>
+<nav class="bottom-nav" aria-label="Навигация">
+<button class="nav-btn active" data-tab="home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Главная</button>
+<button class="nav-btn" data-tab="habits"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Привычки</button>
+<button class="nav-btn" data-tab="insights"><svg viewBox="0 0 24 24"><path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/></svg>Статистика</button>
+<button class="nav-btn" data-tab="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Профиль</button>
+</nav>
+<div class="toast" id="toast"></div>
+<script>
+(()=>{
+const KEY='nordic-habit-v1';
+const $=id=>document.getElementById(id);
+const today=new Date();
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const dateKey=iso(today);
+const dateLabel=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',weekday:'short'}).format(today);
+$('todayDate').textContent=dateLabel;
+let store={days:{}};
+try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.days)store=v}catch(e){}
+const targets=d=>{
+ const x=new Date(d+'T12:00:00');
+ const nov13=new Date('2026-11-13T12:00:00'),nov16=new Date('2026-11-16T12:00:00'),dec16=new Date('2026-12-16T12:00:00');
+ if(x<nov13)return 30;
+ if(x<nov16)return 15;
+ if(x<dec16)return 20;
+ return 25;
+};
+const blank=()=>({trade:'',pushups:'',meditation:'',tradeDone:false,pushDone:false,medDone:false});
+const getDay=d=>({...blank(),...(store.days[d]||{})});
+const save=()=>localStorage.setItem(KEY,JSON.stringify(store));
+const target=targets(dateKey);
+const icons={
+ trade:'<svg viewBox="0 0 24 24"><path d="M3 17 9 11l4 4 8-9"/><path d="M15 6h6v6"/></svg>',
+ push:'<svg viewBox="0 0 24 24"><path d="M2 10v4m3-7v10m14-10v10m3-7v4M5 12h14"/><path d="M8 9v6m8-6v6"/></svg>',
+ med:'<svg viewBox="0 0 24 24"><path d="M12 3c-2 3-5 4-5 8a5 5 0 0 0 10 0c0-4-3-5-5-8Z"/><path d="M5 20h14M9 16l-2 4m8-4 2 4"/></svg>'
+};
+function isDone(d){return d.tradeDone&&d.pushDone&&d.medDone}
+function completedDays(){return Object.keys(store.days).filter(k=>isDone(getDay(k))).length}
+function balance(){return 185+completedDays()*30}
+function toast(s){$('toast').textContent=s;$('toast').style.opacity=1;setTimeout(()=>$('toast').style.opacity=0,1800)}
+function render(){
+ const d=getDay(dateKey),checks=[d.tradeDone,d.pushDone,d.medDone],count=checks.filter(Boolean).length,pct=Math.round(count/3*100);
+ $('percent').textContent=pct+'%';$('progressCaption').textContent=count+' из 3 привычек выполнено';
+ $('ringValue').style.strokeDashoffset=408.4-(408.4*pct/100);
+ $('balanceValue').textContent='$'+balance().toLocaleString('en-US');$('balanceNote').textContent='Старт $185 · +$30 за полный день';
+ $('targetHint').textContent='Цели: $'+target+' / '+target+' повторения';
+ const items=[
+  {id:'trade',name:'Трейдинг',meta:'Дневная цель $'+target,unit:'$',value:d.trade,done:d.tradeDone,placeholder:'0',icon:icons.trade},
+  {id:'pushups',name:'Отжимания',meta:'Дневная цель '+target+' повторений',unit:'раз',value:d.pushups,done:d.pushDone,placeholder:'0',icon:icons.push},
+  {id:'meditation',name:'Медитация',meta:'Спокойствие · 1 минута',unit:'мин',value:d.meditation,done:d.medDone,placeholder:'0',icon:icons.med}
+ ];
+ $('habitList').innerHTML=items.map(it=>'<article class="habit '+(it.done?'done':'')+'"><div class="habit-icon">'+it.icon+'</div><div class="habit-main"><div class="habit-name">'+it.name+'</div><div class="habit-meta">'+it.meta+'</div></div><div class="habit-control"><input class="amount" inputmode="decimal" type="number" min="0" step="1" placeholder="'+it.placeholder+'" aria-label="'+it.name+'" data-input="'+it.id+'" value="'+String(it.value).replace(/"/g,'&quot;')+'"><span class="unit">'+it.unit+'</span><button class="check" type="button" aria-label="Отметить '+it.name+'" aria-pressed="'+it.done+'" data-check="'+it.id+'"></button></div></article>').join('');
+ $('tradeTarget').textContent='$'+target;$('pushTarget').textContent=target;
+ $('statsToday').textContent=count+' / 3';$('statsDays').textContent=completedDays();$('statsBalance').textContent='$'+balance().toLocaleString('en-US');
+ renderWeek();
+}
+function renderWeek(){
+ const start=new Date(today);const wd=(start.getDay()+6)%7;start.setDate(start.getDate()-wd);
+ $('weekStrip').innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const key=iso(d);return '<div class="week-day '+(key===dateKey?'today':'')+'">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]+'<b>'+d.getDate()+'</b></div>'}).join('');
+}
+$('habitList').addEventListener('input',e=>{
+ const id=e.target.dataset.input;if(!id)return;
+ const d=getDay(dateKey);d[id]=e.target.value;
+ if(id==='trade')d.tradeDone=Number(d.trade)>=target;
+ if(id==='pushups')d.pushDone=Number(d.pushups)>=target;
+ if(id==='meditation')d.medDone=Number(d.meditation)>=1;
+ store.days[dateKey]=d;save();render();
+});
+$('habitList').addEventListener('click',e=>{
+ const id=e.target.dataset.check;if(!id)return;
+ const d=getDay(dateKey),flag=id==='trade'?'tradeDone':id==='pushups'?'pushDone':'medDone';
+ d[flag]=!d[flag];
+ if(id==='trade'&&d[flag]&&Number(d.trade)<target)d.trade=String(target);
+ if(id==='pushups'&&d[flag]&&Number(d.pushups)<target)d.pushups=String(target);
+ if(id==='meditation'&&d[flag]&&Number(d.meditation)<1)d.meditation='1';
+ if(!d[flag]&&id==='trade')d.trade='';
+ if(!d[flag]&&id==='pushups')d.pushups='';
+ if(!d[flag]&&id==='meditation')d.meditation='';
+ store.days[dateKey]=d;save();render();
+});
+document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>{
+ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b===btn));
+ document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===btn.dataset.tab));
+}));
+$('exportData').addEventListener('click',()=>{
+ const blob=new Blob([JSON.stringify(store,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='nordic-habit-backup.json';a.click();URL.revokeObjectURL(url);toast('Резервная копия готова');
+});
+$('resetData').addEventListener('click',()=>{
+ if(confirm('Удалить все отметки и вернуть баланс к $185?')){store={days:{}};save();render();toast('Данные сброшены')}
+});
+render();
+})();
+</script>
+<script>
+// Убираем устаревшие кэши оболочки приложения, не трогая пользовательские данные.
+if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if('caches'in window)caches.keys().then(keys=>keys.filter(k=>k.startsWith('habit-space-')).forEach(k=>caches.delete(k))).catch(()=>{});}
+</script>
 </body>
 </html>
