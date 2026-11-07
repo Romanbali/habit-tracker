@@ -65,12 +65,31 @@ h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
 .stat-card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:11px}
 .stat-label{font-size:12px;color:var(--muted)}.stat-number{font-size:25px;font-weight:750;margin-top:4px}
 .profile-note{font-size:13px;color:var(--muted);line-height:1.65}
-.bottom-nav{position:fixed;z-index:5;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(255,254,250,.94);backdrop-filter:blur(16px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr)}
+.bottom-nav{position:fixed;z-index:5;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(255,254,250,.94);backdrop-filter:blur(16px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr)}
 .nav-btn{border:0;background:transparent;color:#77796f;display:flex;flex-direction:column;align-items:center;gap:4px;padding:3px 0;font-size:10px;cursor:pointer}
 .nav-btn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .nav-btn.active{color:var(--sage-dark);font-weight:700}
 .toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%);background:#30352f;color:white;padding:10px 15px;border-radius:99px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .2s}
 @media(min-width:600px){body{padding-top:20px}.app{background:var(--bg)}}
+
+.calendar-card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:15px;box-shadow:var(--shadow);margin-top:18px}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.month-title{font-size:16px;font-weight:700}
+.month-arrows{display:flex;gap:8px}
+.month-arrows button{border:1px solid var(--line);background:var(--bg);border-radius:10px;width:34px;height:32px;color:var(--ink);font-size:18px}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cal-weekday{text-align:center;font-size:10px;color:var(--muted);padding:4px 0 7px}
+.cal-day{min-height:49px;border:1px solid transparent;border-radius:12px;background:#f7f6f0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ink);font-size:12px}
+.cal-day.empty{background:transparent}
+.cal-day.selected{border-color:var(--sage-dark);background:var(--sage-pale)}
+.cal-day.has-plan:after{content:"";width:5px;height:5px;border-radius:50%;background:var(--sage-dark)}
+.plan-editor{margin-top:15px;padding:15px;border-radius:16px;background:#f5f4ef}
+.plan-editor label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}
+.plan-row{display:flex;align-items:center;gap:9px}
+.plan-input{min-width:0;flex:1;border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:12px;font-size:17px;font-weight:700;color:var(--ink)}
+.plan-summary{display:flex;justify-content:space-between;gap:12px;margin-top:13px;font-size:12px;color:var(--muted)}
+.plan-summary b{font-size:14px;color:var(--ink)}
+.plan-save{border:0;border-radius:12px;padding:12px 15px;background:var(--sage-dark);color:white;font-weight:650}
 </style>
 </head>
 <body>
@@ -102,7 +121,18 @@ h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
 <div class="stat-card"><div class="stat-label">Дней с выполненной целью трейдинга</div><div class="stat-number" id="statsDays">0</div></div>
 <div class="stat-card"><div class="stat-label">Текущий баланс цели</div><div class="stat-number" id="statsBalance">$185</div></div>
 </section>
-<section id="profile" class="tab-panel">
+
+<section id="calendar" class="tab-panel">
+<div class="eyebrow">Планирование</div><h1>Доход по трейдингу</h1>
+<p class="profile-note">Запланируй желаемый доход на каждый день. План можно менять в любое время.</p>
+<div class="calendar-card">
+<div class="calendar-head"><button class="month-arrows" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button class="month-arrows" id="nextMonth" aria-label="Следующий месяц">›</button></div>
+<div class="calendar-grid" id="calendarGrid"></div>
+<div class="plan-editor"><label id="selectedDateLabel" for="plannedIncome">Планируемый доход за день, $</label><div class="plan-row"><input class="plan-input" id="plannedIncome" type="number" min="0" step="1" inputmode="decimal" placeholder="Например, 30"><button class="plan-save" id="savePlan">Сохранить</button></div></div>
+<div class="plan-summary"><span>План на месяц</span><b id="monthTotal">$0</b></div>
+</div>
+</section>
+\n<section id="profile" class="tab-panel">
 <div class="eyebrow">Настройки</div><h1>Профиль</h1>
 <div class="stat-card"><div class="stat-label">Твой план</div><div class="stat-number">Nordic Habit</div><p class="profile-note">Три ежедневные привычки: трейдинг, отжимания и медитация. Данные хранятся локально в браузере.</p></div>
 <div class="stat-card"><button id="exportData" style="border:0;background:var(--sage-pale);color:#526b57;border-radius:12px;padding:11px 14px;font-weight:650">Экспортировать данные</button> <button id="resetData" style="border:0;background:#f3e9e5;color:#875d50;border-radius:12px;padding:11px 14px;font-weight:650">Сбросить данные</button></div>
@@ -111,7 +141,7 @@ h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
 <nav class="bottom-nav" aria-label="Навигация">
 <button class="nav-btn active" data-tab="home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Главная</button>
 <button class="nav-btn" data-tab="habits"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Привычки</button>
-<button class="nav-btn" data-tab="insights"><svg viewBox="0 0 24 24"><path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/></svg>Статистика</button>
+<button class="nav-btn" data-tab="calendar"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>План</button>\n<button class="nav-btn" data-tab="insights"><svg viewBox="0 0 24 24"><path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/></svg>Статистика</button>
 <button class="nav-btn" data-tab="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Профиль</button>
 </nav>
 <div class="toast" id="toast"></div>
@@ -198,6 +228,57 @@ $('exportData').addEventListener('click',()=>{
 $('resetData').addEventListener('click',()=>{
  if(confirm('Удалить все отметки и вернуть баланс к $185?')){store={days:{}};save();render();toast('Данные сброшены')}
 });
+
+const PLAN_KEY='nordic-trading-plan-v1';
+let plans={};
+try{plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{}}catch(e){}
+let viewMonth=new Date(today.getFullYear(),today.getMonth(),1);
+let selectedDate=dateKey;
+const money=n=>'
+</script>
+<script>
+// Убираем устаревшие кэши оболочки приложения, не трогая пользовательские данные.
+if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if('caches'in window)caches.keys().then(keys=>keys.filter(k=>k.startsWith('habit-space-')).forEach(k=>caches.delete(k))).catch(()=>{});}
+</script>
+</body>
+</html>+Number(n||0).toLocaleString('en-US');
+function renderCalendar(){
+ const y=viewMonth.getFullYear(),m=viewMonth.getMonth();
+ $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
+ const first=new Date(y,m,1),offset=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();
+ const names=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+ let out=names.map(n=>'<div class="cal-weekday">'+n+'</div>').join('');
+ for(let i=0;i<offset;i++)out+='<div class="cal-day empty"></div>';
+ for(let day=1;day<=days;day++){
+  const key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+  const has=Object.prototype.hasOwnProperty.call(plans,key)&&plans[key]!=='';
+  out+='<button type="button" class="cal-day '+(key===selectedDate?'selected ':'')+(has?'has-plan':'')+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+money(plans[key])+'</small>':'')+'</button>';
+ }
+ $('calendarGrid').innerHTML=out;
+ $('selectedDateLabel').textContent='Планируемый доход · '+new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'}).format(new Date(selectedDate+'T12:00:00'))+', 
+</script>
+<script>
+// Убираем устаревшие кэши оболочки приложения, не трогая пользовательские данные.
+if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if('caches'in window)caches.keys().then(keys=>keys.filter(k=>k.startsWith('habit-space-')).forEach(k=>caches.delete(k))).catch(()=>{});}
+</script>
+</body>
+</html>;
+ $('plannedIncome').value=plans[selectedDate]??'';
+ const total=Object.keys(plans).filter(k=>k.startsWith(y+'-'+String(m+1).padStart(2,'0')+'-')).reduce((s,k)=>s+Number(plans[k]||0),0);
+ $('monthTotal').textContent=money(total);
+}
+$('calendarGrid').addEventListener('click',e=>{
+ const b=e.target.closest('[data-date]');if(!b)return;selectedDate=b.dataset.date;renderCalendar();
+});
+$('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=viewMonth.getFullYear()+'-'+String(viewMonth.getMonth()+1).padStart(2,'0')+'-01';renderCalendar()});
+$('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=viewMonth.getFullYear()+'-'+String(viewMonth.getMonth()+1).padStart(2,'0')+'-01';renderCalendar()});
+$('savePlan').addEventListener('click',()=>{
+ const v=$('plannedIncome').value.trim();
+ if(v===''||Number(v)===0)delete plans[selectedDate];else if(Number(v)>=0)plans[selectedDate]=String(Number(v));
+ localStorage.setItem(PLAN_KEY,JSON.stringify(plans));renderCalendar();toast('План сохранён');
+});
+renderCalendar();
+
 render();
 })();
 </script>
