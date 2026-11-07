@@ -73,77 +73,12 @@ function renderMonthPlan(){
  const y=month.getFullYear(),m=month.getMonth(),days=new Date(y,m+1,0).getDate();
  const trading=state.habits.find(h=>h.id==='trading');
  let target=0,actual=0,completed=0;
- for(let n=1;n<=days;n++){const key=iso(new Date(y,m,n));if(trading){target+=goalFor(trading,key);actual+=actualFor(trading,key);if(isDone(trading,key))completed++}}
- $('monthTarget').textContent='
- const box=$('habits');box.innerHTML='';let complete=0;
- state.habits.forEach(h=>{
-  const target=goalFor(h,selected),actual=actualFor(h,selected),done=isDone(h,selected);if(done)complete++;
-  const card=document.createElement('section');card.className='habit';
-  const head=document.createElement('div');head.className='habithead';
-  const emoji=document.createElement('div');emoji.className='emoji';emoji.textContent=h.emoji||'✨';
-  const info=document.createElement('div');info.className='habitinfo';
-  const name=document.createElement('div');name.className='habitname';name.textContent=h.name;
-  const meta=document.createElement('div');meta.className='habitmeta';meta.textContent=done?'Цель выполнена ✓':'Цель: '+target+' '+h.unit+' · Выполнено: '+actual+' '+h.unit;
-  const status=document.createElement('div');status.className='status';status.textContent=done?'ГОТОВО':'В ПРОЦЕССЕ';
-  info.append(name,meta);head.append(emoji,info,status);
-  const inputs=document.createElement('div');inputs.className='inputs';
-  const goalField=makeField('Цель ('+h.unit+')',target);const actualField=makeField('Факт ('+h.unit+')',actual);
-  goalField.input.min='0';goalField.input.step='any';actualField.input.min='0';actualField.input.step='any';
-  goalField.input.onchange=()=>{const n=Number(goalField.input.value);if(!Number.isFinite(n)||n<0){goalField.input.value=target;return}state.goals[selected]=state.goals[selected]||{};state.goals[selected][h.id]=n;save();render()};
-  actualField.input.onchange=()=>{const n=Number(actualField.input.value);if(!Number.isFinite(n)||n<0){actualField.input.value=actual;return}state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=n;save();render()};
-  inputs.append(goalField.wrap,actualField.wrap);
-  const bar=document.createElement('div');bar.className='progress';const fill=document.createElement('div');fill.className='fill';fill.style.width=(target>0?Math.min(100,actual/target*100):0)+'%';bar.append(fill);
-  const actions=document.createElement('div');actions.className='actions';const quick=document.createElement('button');quick.className='btn primary';quick.textContent=done?'Снять выполнение':'Отметить цель выполненной';quick.onclick=()=>{state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=done?0:target;save();render()};actions.append(quick);
-  card.append(head,inputs,bar,actions);box.append(card)
- });
- $('dayProgress').textContent=complete+' / '+state.habits.length+' выполнено';
-}
-function makeField(label,value){const wrap=document.createElement('div');wrap.className='field';const l=document.createElement('label');l.textContent=label;const input=document.createElement('input');input.type='number';input.inputMode='decimal';input.value=value;wrap.append(l,input);return {wrap,input}}
-function render(){renderCalendar();renderMonthPlan();renderHabits();$('selectedLabel').textContent=fmt(fromISO(selected),{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('todayLabel').textContent='Сегодня: '+fmt(today,{day:'numeric',month:'short'})}
-$('prev').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);renderCalendar()};
-$('next').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);renderCalendar()};
-$('goToday').onclick=()=>{selected=day0;month=new Date(today.getFullYear(),today.getMonth(),1);render()};
-$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='habit-space-backup.json';a.click();URL.revokeObjectURL(a.href)};
-$('importBtn').onclick=()=>$('importFile').click();
-$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.habits))throw Error();state={habits:data.habits,done:data.done||{},goals:data.goals||{},actual:data.actual||{}};save();render();alert('Данные восстановлены')}catch{alert('Не удалось прочитать копию')}e.target.value=''};
-save();render();
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-</script></body></html>+target.toLocaleString('en-US');
- $('monthDetails').textContent=trading?'План на '+days+' дней · Факт: 
- const box=$('habits');box.innerHTML='';let complete=0;
- state.habits.forEach(h=>{
-  const target=goalFor(h,selected),actual=actualFor(h,selected),done=isDone(h,selected);if(done)complete++;
-  const card=document.createElement('section');card.className='habit';
-  const head=document.createElement('div');head.className='habithead';
-  const emoji=document.createElement('div');emoji.className='emoji';emoji.textContent=h.emoji||'✨';
-  const info=document.createElement('div');info.className='habitinfo';
-  const name=document.createElement('div');name.className='habitname';name.textContent=h.name;
-  const meta=document.createElement('div');meta.className='habitmeta';meta.textContent=done?'Цель выполнена ✓':'Цель: '+target+' '+h.unit+' · Выполнено: '+actual+' '+h.unit;
-  const status=document.createElement('div');status.className='status';status.textContent=done?'ГОТОВО':'В ПРОЦЕССЕ';
-  info.append(name,meta);head.append(emoji,info,status);
-  const inputs=document.createElement('div');inputs.className='inputs';
-  const goalField=makeField('Цель ('+h.unit+')',target);const actualField=makeField('Факт ('+h.unit+')',actual);
-  goalField.input.min='0';goalField.input.step='any';actualField.input.min='0';actualField.input.step='any';
-  goalField.input.onchange=()=>{const n=Number(goalField.input.value);if(!Number.isFinite(n)||n<0){goalField.input.value=target;return}state.goals[selected]=state.goals[selected]||{};state.goals[selected][h.id]=n;save();render()};
-  actualField.input.onchange=()=>{const n=Number(actualField.input.value);if(!Number.isFinite(n)||n<0){actualField.input.value=actual;return}state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=n;save();render()};
-  inputs.append(goalField.wrap,actualField.wrap);
-  const bar=document.createElement('div');bar.className='progress';const fill=document.createElement('div');fill.className='fill';fill.style.width=(target>0?Math.min(100,actual/target*100):0)+'%';bar.append(fill);
-  const actions=document.createElement('div');actions.className='actions';const quick=document.createElement('button');quick.className='btn primary';quick.textContent=done?'Снять выполнение':'Отметить цель выполненной';quick.onclick=()=>{state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=done?0:target;save();render()};actions.append(quick);
-  card.append(head,inputs,bar,actions);box.append(card)
- });
- $('dayProgress').textContent=complete+' / '+state.habits.length+' выполнено';
-}
-function makeField(label,value){const wrap=document.createElement('div');wrap.className='field';const l=document.createElement('label');l.textContent=label;const input=document.createElement('input');input.type='number';input.inputMode='decimal';input.value=value;wrap.append(l,input);return {wrap,input}}
-function render(){renderCalendar();renderHabits();$('selectedLabel').textContent=fmt(fromISO(selected),{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('todayLabel').textContent='Сегодня: '+fmt(today,{day:'numeric',month:'short'})}
-$('prev').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);renderCalendar()};
-$('next').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);renderCalendar()};
-$('goToday').onclick=()=>{selected=day0;month=new Date(today.getFullYear(),today.getMonth(),1);render()};
-$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='habit-space-backup.json';a.click();URL.revokeObjectURL(a.href)};
-$('importBtn').onclick=()=>$('importFile').click();
-$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.habits))throw Error();state={habits:data.habits,done:data.done||{},goals:data.goals||{},actual:data.actual||{}};save();render();alert('Данные восстановлены')}catch{alert('Не удалось прочитать копию')}e.target.value=''};
-save();render();
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-</script></body></html>+actual.toLocaleString('en-US')+' · Выполнено дней: '+completed:'Добавь привычку «Трейдинг», чтобы рассчитать план';
+ for(let n=1;n<=days;n++){
+  const key=iso(new Date(y,m,n));
+  if(trading){target+=goalFor(trading,key);actual+=actualFor(trading,key);if(isDone(trading,key))completed++}
+ }
+ $('monthTarget').textContent='$'+target.toLocaleString('en-US');
+ $('monthDetails').textContent=trading?'План на '+days+' дней · Факт: $'+actual.toLocaleString('en-US')+' · Выполнено дней: '+completed:'Добавь привычку «Трейдинг», чтобы рассчитать план';
 }
 function renderHabits(){
  const box=$('habits');box.innerHTML='';let complete=0;
