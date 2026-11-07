@@ -117,7 +117,7 @@ $('importBtn').onclick=()=>$('importFile').click();
 $('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.habits))throw Error();state={habits:data.habits,done:data.done||{},goals:data.goals||{},actual:data.actual||{}};save();render();alert('Данные восстановлены')}catch{alert('Не удалось прочитать копию')}e.target.value=''};
 save();render();
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-</script></body></html>+(185+completed*30).toLocaleString('en-US');$('balanceDetails').textContent='Старт: $185 · Выполнено дней трейдинга: '+completed+' · Начислено: +
+</script></body></html>+(185+completed*30).toLocaleString('en-US');$('balanceDetails').textContent='Старт: $185 · Выполнено дней: '+completed+' · Начислено: +
  const box=$('habits');box.innerHTML='';let complete=0;
  state.habits.forEach(h=>{
   const target=goalFor(h,selected),actual=actualFor(h,selected),done=isDone(h,selected);if(done)complete++;
