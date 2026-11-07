@@ -167,7 +167,7 @@ function renderWeek(){
  const start=new Date(today);const wd=(start.getDay()+6)%7;start.setDate(start.getDate()-wd);
  $('weekStrip').innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const key=iso(d);return '<div class="week-day '+(key===dateKey?'today':'')+'">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]+'<b>'+d.getDate()+'</b></div>'}).join('');
 }
-$('habitList').addEventListener('input',e=>{
+$('habitList').addEventListener('change',e=>{
  const id=e.target.dataset.input;if(!id)return;
  const d=getDay(dateKey);d[id]=e.target.value;
  if(id==='trade')d.tradeDone=Number(d.trade)>=target;
