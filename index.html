@@ -21,7 +21,8 @@ main{max-width:650px;margin:0 auto;padding:24px 0 42px}.top{display:flex;justify
 <section class="card">
  <div class="monthbar"><button class="nav" id="prev" aria-label="Предыдущий месяц">‹</button><strong id="monthTitle"></strong><button class="nav" id="next" aria-label="Следующий месяц">›</button></div>
  <div class="calendar" id="calendar"></div>
- <div class="selectedline"><span id="selectedLabel"></span><button class="todaybtn" id="goToday">К сегодняшнему дню</button></div>\n <div class="month-plan"><div class="plan-label">ПЛАН ПРИБЫЛИ ЗА МЕСЯЦ</div><div class="plan-value" id="monthTarget">$0</div><div class="plan-details" id="monthDetails"></div></div>
+ <div class="selectedline"><span id="selectedLabel"></span><button class="todaybtn" id="goToday">К сегодняшнему дню</button></div>\n <div class="month-plan"><div class="plan-label">ПЛАН ПРИБЫЛИ ЗА МЕСЯЦ</div><div class="plan-value" id="monthTarget">$0</div><div class="plan-details" id="monthDetails"></div>
+ <div class="plan-label" style="margin-top:14px">БАЛАНС ЦЕЛИ</div><div class="plan-value" id="goalBalance">$185</div><div class="plan-details" id="balanceDetails">Стартовый баланс · +$30 за каждый выполненный день трейдинга</div></div>
 </section>
 <div class="section-head"><h2>Цели на выбранный день</h2><span class="date" id="dayProgress"></span></div>
 <div id="habits"></div>
@@ -53,11 +54,13 @@ if(!state||!Array.isArray(state.habits)){
   state.habits=state.habits.map(h=>{const s=seed.find(x=>x.id===h.id);return s?{...s,...h,schedule:s.schedule}:h});
  }
 }
+function clearPastRecords(){['done','goals','actual'].forEach(group=>{Object.keys(state[group]||{}).forEach(day=>{if(day<day0)delete state[group][day]})})}
+clearPastRecords();
 let selected=day0;
 let month=new Date(today.getFullYear(),today.getMonth(),1);
 const $=id=>document.getElementById(id);
 const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
-function goalFor(h,day){if(state.goals[day]&&state.goals[day][h.id]!=null)return Number(state.goals[day][h.id]);let v=h.base||1;(h.schedule||[]).forEach(s=>{if(day>=s.from)v=s.value});return v}
+function goalFor(h,day){if(day<day0)return 0;if(state.goals[day]&&state.goals[day][h.id]!=null)return Number(state.goals[day][h.id]);let v=h.base||1;(h.schedule||[]).forEach(s=>{if(day>=s.from)v=s.value});return v}
 function actualFor(h,day){return Number(state.actual[day]?.[h.id]||0)}
 function isDone(h,day){return actualFor(h,day)>=goalFor(h,day)&&actualFor(h,day)>0}
 function fmt(d,opts){return new Intl.DateTimeFormat('ru-RU',opts).format(d)}
@@ -80,6 +83,75 @@ function renderMonthPlan(){
  $('monthTarget').textContent='$'+target.toLocaleString('en-US');
  $('monthDetails').textContent=trading?'План на '+days+' дней · Факт: $'+actual.toLocaleString('en-US')+' · Выполнено дней: '+completed:'Добавь привычку «Трейдинг», чтобы рассчитать план';
 }
+function renderGoalBalance(){const trading=state.habits.find(h=>h.id==='trading');let completed=0;if(trading){Object.keys(state.actual).forEach(day=>{if(day>=day0&&isDone(trading,day))completed++})}$('goalBalance').textContent='
+ const box=$('habits');box.innerHTML='';let complete=0;
+ state.habits.forEach(h=>{
+  const target=goalFor(h,selected),actual=actualFor(h,selected),done=isDone(h,selected);if(done)complete++;
+  const card=document.createElement('section');card.className='habit';
+  const head=document.createElement('div');head.className='habithead';
+  const emoji=document.createElement('div');emoji.className='emoji';emoji.textContent=h.emoji||'✨';
+  const info=document.createElement('div');info.className='habitinfo';
+  const name=document.createElement('div');name.className='habitname';name.textContent=h.name;
+  const meta=document.createElement('div');meta.className='habitmeta';meta.textContent=done?'Цель выполнена ✓':'Цель: '+target+' '+h.unit+' · Выполнено: '+actual+' '+h.unit;
+  const status=document.createElement('div');status.className='status';status.textContent=done?'ГОТОВО':'В ПРОЦЕССЕ';
+  info.append(name,meta);head.append(emoji,info,status);
+  const inputs=document.createElement('div');inputs.className='inputs';
+  const goalField=makeField('Цель ('+h.unit+')',target);const actualField=makeField('Факт ('+h.unit+')',actual);
+  goalField.input.min='0';goalField.input.step='any';actualField.input.min='0';actualField.input.step='any';
+  goalField.input.onchange=()=>{const n=Number(goalField.input.value);if(!Number.isFinite(n)||n<0){goalField.input.value=target;return}state.goals[selected]=state.goals[selected]||{};state.goals[selected][h.id]=n;save();render()};
+  actualField.input.onchange=()=>{const n=Number(actualField.input.value);if(!Number.isFinite(n)||n<0){actualField.input.value=actual;return}state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=n;save();render()};
+  inputs.append(goalField.wrap,actualField.wrap);
+  const bar=document.createElement('div');bar.className='progress';const fill=document.createElement('div');fill.className='fill';fill.style.width=(target>0?Math.min(100,actual/target*100):0)+'%';bar.append(fill);
+  const actions=document.createElement('div');actions.className='actions';const quick=document.createElement('button');quick.className='btn primary';quick.textContent=done?'Снять выполнение':'Отметить цель выполненной';quick.onclick=()=>{state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=done?0:target;save();render()};actions.append(quick);
+  card.append(head,inputs,bar,actions);box.append(card)
+ });
+ $('dayProgress').textContent=complete+' / '+state.habits.length+' выполнено';
+}
+function makeField(label,value){const wrap=document.createElement('div');wrap.className='field';const l=document.createElement('label');l.textContent=label;const input=document.createElement('input');input.type='number';input.inputMode='decimal';input.value=value;wrap.append(l,input);return {wrap,input}}
+function render(){renderCalendar();renderMonthPlan();renderGoalBalance();renderHabits();$('selectedLabel').textContent=fmt(fromISO(selected),{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('todayLabel').textContent='Сегодня: '+fmt(today,{day:'numeric',month:'short'})}
+$('prev').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);renderCalendar()};
+$('next').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);renderCalendar()};
+$('goToday').onclick=()=>{selected=day0;month=new Date(today.getFullYear(),today.getMonth(),1);render()};
+$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='habit-space-backup.json';a.click();URL.revokeObjectURL(a.href)};
+$('importBtn').onclick=()=>$('importFile').click();
+$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.habits))throw Error();state={habits:data.habits,done:data.done||{},goals:data.goals||{},actual:data.actual||{}};save();render();alert('Данные восстановлены')}catch{alert('Не удалось прочитать копию')}e.target.value=''};
+save();render();
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script></body></html>+(185+completed*30).toLocaleString('en-US');$('balanceDetails').textContent='Старт: $185 · Выполнено дней трейдинга: '+completed+' · Начислено: +
+ const box=$('habits');box.innerHTML='';let complete=0;
+ state.habits.forEach(h=>{
+  const target=goalFor(h,selected),actual=actualFor(h,selected),done=isDone(h,selected);if(done)complete++;
+  const card=document.createElement('section');card.className='habit';
+  const head=document.createElement('div');head.className='habithead';
+  const emoji=document.createElement('div');emoji.className='emoji';emoji.textContent=h.emoji||'✨';
+  const info=document.createElement('div');info.className='habitinfo';
+  const name=document.createElement('div');name.className='habitname';name.textContent=h.name;
+  const meta=document.createElement('div');meta.className='habitmeta';meta.textContent=done?'Цель выполнена ✓':'Цель: '+target+' '+h.unit+' · Выполнено: '+actual+' '+h.unit;
+  const status=document.createElement('div');status.className='status';status.textContent=done?'ГОТОВО':'В ПРОЦЕССЕ';
+  info.append(name,meta);head.append(emoji,info,status);
+  const inputs=document.createElement('div');inputs.className='inputs';
+  const goalField=makeField('Цель ('+h.unit+')',target);const actualField=makeField('Факт ('+h.unit+')',actual);
+  goalField.input.min='0';goalField.input.step='any';actualField.input.min='0';actualField.input.step='any';
+  goalField.input.onchange=()=>{const n=Number(goalField.input.value);if(!Number.isFinite(n)||n<0){goalField.input.value=target;return}state.goals[selected]=state.goals[selected]||{};state.goals[selected][h.id]=n;save();render()};
+  actualField.input.onchange=()=>{const n=Number(actualField.input.value);if(!Number.isFinite(n)||n<0){actualField.input.value=actual;return}state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=n;save();render()};
+  inputs.append(goalField.wrap,actualField.wrap);
+  const bar=document.createElement('div');bar.className='progress';const fill=document.createElement('div');fill.className='fill';fill.style.width=(target>0?Math.min(100,actual/target*100):0)+'%';bar.append(fill);
+  const actions=document.createElement('div');actions.className='actions';const quick=document.createElement('button');quick.className='btn primary';quick.textContent=done?'Снять выполнение':'Отметить цель выполненной';quick.onclick=()=>{state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=done?0:target;save();render()};actions.append(quick);
+  card.append(head,inputs,bar,actions);box.append(card)
+ });
+ $('dayProgress').textContent=complete+' / '+state.habits.length+' выполнено';
+}
+function makeField(label,value){const wrap=document.createElement('div');wrap.className='field';const l=document.createElement('label');l.textContent=label;const input=document.createElement('input');input.type='number';input.inputMode='decimal';input.value=value;wrap.append(l,input);return {wrap,input}}
+function render(){renderCalendar();renderMonthPlan();renderHabits();$('selectedLabel').textContent=fmt(fromISO(selected),{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('todayLabel').textContent='Сегодня: '+fmt(today,{day:'numeric',month:'short'})}
+$('prev').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);renderCalendar()};
+$('next').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);renderCalendar()};
+$('goToday').onclick=()=>{selected=day0;month=new Date(today.getFullYear(),today.getMonth(),1);render()};
+$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='habit-space-backup.json';a.click();URL.revokeObjectURL(a.href)};
+$('importBtn').onclick=()=>$('importFile').click();
+$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.habits))throw Error();state={habits:data.habits,done:data.done||{},goals:data.goals||{},actual:data.actual||{}};save();render();alert('Данные восстановлены')}catch{alert('Не удалось прочитать копию')}e.target.value=''};
+save();render();
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script></body></html>+(completed*30).toLocaleString('en-US')}
 function renderHabits(){
  const box=$('habits');box.innerHTML='';let complete=0;
  state.habits.forEach(h=>{
