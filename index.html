@@ -99,11 +99,12 @@ function renderHabits(){
   const inputs=document.createElement('div');inputs.className='inputs';
   const goalField=makeField('Цель ('+h.unit+')',target);const actualField=makeField('Факт ('+h.unit+')',actual);
   goalField.input.min='0';goalField.input.step='any';actualField.input.min='0';actualField.input.step='any';
+  if(selected<day0){goalField.input.value='';actualField.input.value='';goalField.input.disabled=true;actualField.input.disabled=true;}
   goalField.input.onchange=()=>{const n=Number(goalField.input.value);if(!Number.isFinite(n)||n<0){goalField.input.value=target;return}state.goals[selected]=state.goals[selected]||{};state.goals[selected][h.id]=n;save();render()};
   actualField.input.onchange=()=>{const n=Number(actualField.input.value);if(!Number.isFinite(n)||n<0){actualField.input.value=actual;return}state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=n;save();render()};
   inputs.append(goalField.wrap,actualField.wrap);
   const bar=document.createElement('div');bar.className='progress';const fill=document.createElement('div');fill.className='fill';fill.style.width=(target>0?Math.min(100,actual/target*100):0)+'%';bar.append(fill);
-  const actions=document.createElement('div');actions.className='actions';const quick=document.createElement('button');quick.className='btn primary';quick.textContent=done?'Снять выполнение':'Отметить цель выполненной';quick.onclick=()=>{state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=done?0:target;save();render()};actions.append(quick);
+  const actions=document.createElement('div');actions.className='actions';const quick=document.createElement('button');quick.className='btn primary';quick.textContent=selected<day0?'Прошедший день':(done?'Снять выполнение':'Отметить цель выполненной');quick.disabled=selected<day0;quick.onclick=()=>{state.actual[selected]=state.actual[selected]||{};state.actual[selected][h.id]=done?0:target;save();render()};actions.append(quick);
   card.append(head,inputs,bar,actions);box.append(card)
  });
  $('dayProgress').textContent=complete+' / '+state.habits.length+' выполнено';
