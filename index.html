@@ -234,14 +234,7 @@ let plans={};
 try{plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{}}catch(e){}
 let viewMonth=new Date(today.getFullYear(),today.getMonth(),1);
 let selectedDate=dateKey;
-const money=n=>'
-</script>
-<script>
-// Убираем устаревшие кэши оболочки приложения, не трогая пользовательские данные.
-if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if('caches'in window)caches.keys().then(keys=>keys.filter(k=>k.startsWith('habit-space-')).forEach(k=>caches.delete(k))).catch(()=>{});}
-</script>
-</body>
-</html>+Number(n||0).toLocaleString('en-US');
+const money=n=>'$'+Number(n||0).toLocaleString('en-US');
 function renderCalendar(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth();
  $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
@@ -255,16 +248,9 @@ function renderCalendar(){
   out+='<button type="button" class="cal-day '+(key===selectedDate?'selected ':'')+(has?'has-plan':'')+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+money(plans[key])+'</small>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
- $('selectedDateLabel').textContent='Планируемый доход · '+new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'}).format(new Date(selectedDate+'T12:00:00'))+', 
-</script>
-<script>
-// Убираем устаревшие кэши оболочки приложения, не трогая пользовательские данные.
-if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if('caches'in window)caches.keys().then(keys=>keys.filter(k=>k.startsWith('habit-space-')).forEach(k=>caches.delete(k))).catch(()=>{});}
-</script>
-</body>
-</html>;
+ $('selectedDateLabel').textContent='Планируемый доход · '+new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'}).format(new Date(selectedDate+'T12:00:00'));
  $('plannedIncome').value=plans[selectedDate]??'';
- const total=Object.keys(plans).filter(k=>k.startsWith(y+'-'+String(m+1).padStart(2,'0')+'-')).reduce((s,k)=>s+Number(plans[k]||0),0);
+ const total=Object.keys(plans).filter(k=>k.startsWith(y+'-'+String(m+1).padStart(2,'0')+'-')).reduce((sum,k)=>sum+Number(plans[k]||0),0);
  $('monthTotal').textContent=money(total);
 }
 $('calendarGrid').addEventListener('click',e=>{
@@ -278,12 +264,11 @@ $('savePlan').addEventListener('click',()=>{
  localStorage.setItem(PLAN_KEY,JSON.stringify(plans));renderCalendar();toast('План сохранён');
 });
 renderCalendar();
-
 render();
 })();
 </script>
 <script>
-// Убираем устаревшие кэши оболочки приложения, не трогая пользовательские данные.
+// Удаляем только устаревшие кэши оболочки; пользовательские данные localStorage не затрагиваются.
 if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if('caches'in window)caches.keys().then(keys=>keys.filter(k=>k.startsWith('habit-space-')).forEach(k=>caches.delete(k))).catch(()=>{});}
 </script>
 </body>
