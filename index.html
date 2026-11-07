@@ -105,7 +105,7 @@ function renderHabits(){
  $('dayProgress').textContent=complete+' / '+state.habits.length+' выполнено';
 }
 function makeField(label,value){const wrap=document.createElement('div');wrap.className='field';const l=document.createElement('label');l.textContent=label;const input=document.createElement('input');input.type='number';input.inputMode='decimal';input.value=value;wrap.append(l,input);return {wrap,input}}
-function render(){renderCalendar();renderHabits();$('selectedLabel').textContent=fmt(fromISO(selected),{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('todayLabel').textContent='Сегодня: '+fmt(today,{day:'numeric',month:'short'})}
+function render(){renderCalendar();renderMonthPlan();renderHabits();$('selectedLabel').textContent=fmt(fromISO(selected),{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('todayLabel').textContent='Сегодня: '+fmt(today,{day:'numeric',month:'short'})}
 $('prev').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);renderCalendar()};
 $('next').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);renderCalendar()};
 $('goToday').onclick=()=>{selected=day0;month=new Date(today.getFullYear(),today.getMonth(),1);render()};
