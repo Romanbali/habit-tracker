@@ -1,4 +1,4 @@
-const CACHE='habit-space-v7';
+const CACHE='habit-space-v8';
 const FILES=['./','./index.html','./manifest.webmanifest'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
