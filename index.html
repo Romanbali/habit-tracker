@@ -37,8 +37,8 @@ const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+Stri
 const fromISO=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
 const day0=iso(today);
 const seed=[
- {id:'trading',name:'Трейдинг',emoji:'💵',unit:'$',base:30,schedule:[{from:'2026-11-13',value:15},{from:'2026-11-16',value:20}]},
- {id:'pushups',name:'Отжимания',emoji:'💪',unit:'раз',base:30,schedule:[{from:'2026-11-13',value:15},{from:'2026-11-16',value:20}]},
+ {id:'trading',name:'Трейдинг',emoji:'💵',unit:'$',base:30,schedule:[{from:'2026-11-13',value:15},{from:'2026-11-16',value:20},{from:'2026-12-16',value:25}]},
+ {id:'pushups',name:'Отжимания',emoji:'💪',unit:'раз',base:30,schedule:[{from:'2026-11-13',value:15},{from:'2026-11-16',value:20},{from:'2026-12-16',value:25}]},
  {id:'meditation',name:'Медитация',emoji:'🧘',unit:'мин',base:1,schedule:[]}
 ];
 let state;try{state=JSON.parse(localStorage.getItem(KEY))}catch{}
