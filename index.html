@@ -99,7 +99,7 @@ h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
 <section id="insights" class="tab-panel">
 <div class="eyebrow">Твой результат</div><h1>Статистика</h1>
 <div class="stat-card"><div class="stat-label">Выполнено привычек сегодня</div><div class="stat-number" id="statsToday">0 / 3</div></div>
-<div class="stat-card"><div class="stat-label">Дней с полным выполнением</div><div class="stat-number" id="statsDays">0</div></div>
+<div class="stat-card"><div class="stat-label">Дней с выполненной целью трейдинга</div><div class="stat-number" id="statsDays">0</div></div>
 <div class="stat-card"><div class="stat-label">Текущий баланс цели</div><div class="stat-number" id="statsBalance">$185</div></div>
 </section>
 <section id="profile" class="tab-panel">
@@ -144,14 +144,14 @@ const icons={
  med:'<svg viewBox="0 0 24 24"><path d="M12 3c-2 3-5 4-5 8a5 5 0 0 0 10 0c0-4-3-5-5-8Z"/><path d="M5 20h14M9 16l-2 4m8-4 2 4"/></svg>'
 };
 function isDone(d){return d.tradeDone&&d.pushDone&&d.medDone}
-function completedDays(){return Object.keys(store.days).filter(k=>isDone(getDay(k))).length}
+function completedDays(){return Object.keys(store.days).filter(k=>{const d=getDay(k);return d.tradeDone||Number(d.trade)>=targets(k)}).length}
 function balance(){return 185+completedDays()*30}
 function toast(s){$('toast').textContent=s;$('toast').style.opacity=1;setTimeout(()=>$('toast').style.opacity=0,1800)}
 function render(){
  const d=getDay(dateKey),checks=[d.tradeDone,d.pushDone,d.medDone],count=checks.filter(Boolean).length,pct=Math.round(count/3*100);
  $('percent').textContent=pct+'%';$('progressCaption').textContent=count+' из 3 привычек выполнено';
  $('ringValue').style.strokeDashoffset=408.4-(408.4*pct/100);
- $('balanceValue').textContent='$'+balance().toLocaleString('en-US');$('balanceNote').textContent='Старт $185 · +$30 за полный день';
+ $('balanceValue').textContent='$'+balance().toLocaleString('en-US');$('balanceNote').textContent='Старт $185 · +$30 за достижение цели трейдинга';
  $('targetHint').textContent='Цели: $'+target+' / '+target+' повторения';
  const items=[
   {id:'trade',name:'Трейдинг',meta:'Дневная цель $'+target,unit:'$',value:d.trade,done:d.tradeDone,placeholder:'0',icon:icons.trade},
