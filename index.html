@@ -168,9 +168,18 @@ body{background:#eef1f5;color:#171b22}
 .calendar-range-editor{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#f4f7fb}
 .calendar-range-editor[hidden]{display:none}
 .calendar-range-caption{font-size:14px;font-weight:650;color:var(--ink);margin-bottom:10px}
-.calendar-range-fields{display:flex;align-items:end;gap:8px;flex-wrap:wrap}
-.calendar-range-fields label{flex:1;min-width:105px;font-size:12px;color:var(--muted)}
-.calendar-range-fields input,.calendar-range-fields select{display:block;width:100%;margin-top:6px;box-sizing:border-box;border:1px solid var(--line);border-radius:11px;padding:10px;background:#fff;color:var(--ink);font-size:14px}
+.calendar-money-fields{display:grid;gap:9px}
+.money-field{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid var(--line);border-radius:13px;background:#fff;min-width:0}
+.money-field-icon{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:10px;background:#e9f1fb;color:#347fc7;font-size:19px;font-weight:700}
+.withdrawal-field .money-field-icon{background:#eeedfb;color:#6662a8}
+.money-field-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+.money-field-copy b{font-size:12px;color:var(--ink)}
+.money-field-copy small{font-size:10px;color:var(--muted)}
+.money-field input{width:100px;min-width:75px;max-width:38%;border:1px solid var(--line);border-radius:10px;padding:9px 7px;background:#f8fafc;color:var(--ink);font-size:14px;font-weight:650;text-align:right}
+.calendar-edit-actions{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+.calendar-edit-actions button{border:0;border-radius:11px;padding:11px 13px;font-size:12px;font-weight:700;cursor:pointer}
+.calendar-edit-actions #calendarRangeSave{flex:1;background:var(--sage-dark);color:white}
+.calendar-edit-actions .calendar-remove-withdrawal{background:#eeedfb;color:#625f9e}
 .calendar-edit-balance{font-size:11px;color:var(--muted);margin:-3px 0 10px}
 .cal-day.withdrawal{background:#e9eafa!important;color:#4c4d91!important;border-color:#d6d8f2!important}
 .cal-day .withdrawal-label{color:#4c4d91!important;font-size:8px!important}
@@ -202,7 +211,11 @@ body{background:#eef1f5;color:#171b22}
  <div class="calendar-range-editor" id="calendarRangeEditor" hidden>
   <div class="calendar-range-caption" id="calendarRangeCaption">Выбери первый день периода</div>
   <div id="calendarEditBalance" class="calendar-edit-balance"></div>
-  <div class="calendar-range-fields"><label>Тип записи<select id="calendarRangeType"><option value="result">Результат дня</option><option value="withdrawal">Вывод средств</option></select></label><label>Сумма, $<input id="calendarRangeAmount" type="number" step="0.01" inputmode="decimal" placeholder="Например, 45 или −12"></label><button type="button" id="calendarRangeSave">Сохранить</button></div>
+  <div class="calendar-money-fields">
+   <label class="money-field"><span class="money-field-icon">↗</span><span class="money-field-copy"><b>Результат торговли</b><small>Прибыль или убыток за день</small></span><input id="calendarResultAmount" type="number" step="0.01" inputmode="decimal" placeholder="Например, 120 или −15"></label>
+   <label class="money-field withdrawal-field"><span class="money-field-icon">⇧</span><span class="money-field-copy"><b>Вывод средств</b><small>Сколько денег вывел</small></span><input id="calendarWithdrawalAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Необязательно"></label>
+  </div>
+  <div class="calendar-edit-actions"><button type="button" id="calendarRangeSave">Сохранить изменения</button><button type="button" class="calendar-remove-withdrawal" id="calendarRemoveWithdrawal">Убрать вывод</button></div>
  </div>
  <div class="calendar-grid" id="calendarGrid"></div>
 
@@ -371,7 +384,7 @@ $('calendarGrid').addEventListener('click',e=>{
   else{rangeEnd=selectedDate;if(rangeEnd<rangeStart){const swap=rangeStart;rangeStart=rangeEnd;rangeEnd=swap;}
    const fmt=x=>new Date(x+'T12:00:00').toLocaleDateString('ru-RU');
    $('calendarRangeCaption').textContent=rangeStart===rangeEnd?'Результат за '+fmt(rangeStart):'Период: '+fmt(rangeStart)+' — '+fmt(rangeEnd);
-   const existing=actuals[rangeStart],chosenType=$('calendarRangeType').value,existingValue=chosenType==='withdrawal'?entryWithdrawal(existing):entryResult(existing);$('calendarRangeAmount').value=existingValue??'';$('calendarEditBalance').textContent='Баланс цели: $'+balance().toLocaleString('en-US');
+   const existing=actuals[rangeStart];$('calendarResultAmount').value=entryResult(existing)??'';$('calendarWithdrawalAmount').value=entryWithdrawal(existing)??'';$('calendarEditBalance').textContent='Баланс цели: $'+balance().toLocaleString('en-US');
    $('calendarRangeEditor').hidden=false;
   }
  }else{renderCalendar();return;}
@@ -379,16 +392,24 @@ $('calendarGrid').addEventListener('click',e=>{
 });
 $('calendarRangeSave').addEventListener('click',()=>{
  if(!rangeStart||!rangeEnd){toast('Выбери начало и конец периода');return}
- const raw=$('calendarRangeAmount').value.trim(),type=$('calendarRangeType').value;
- if(raw===''||!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}
- const amount=Number(raw),cursor=new Date(rangeStart+'T12:00:00'),last=new Date(rangeEnd+'T12:00:00');
- while(cursor<=last){const key=iso(cursor),old=actuals[key],result=entryResult(old),withdrawal=entryWithdrawal(old);actuals[key]={result:type==='result'?amount:result,withdrawal:type==='withdrawal'?amount:withdrawal};cursor.setDate(cursor.getDate()+1)}
+ const resultRaw=$('calendarResultAmount').value.trim(),withdrawalRaw=$('calendarWithdrawalAmount').value.trim();
+ if(resultRaw!==''&&!Number.isFinite(Number(resultRaw))){toast('Проверь сумму результата');return}
+ if(withdrawalRaw!==''&&(!Number.isFinite(Number(withdrawalRaw))||Number(withdrawalRaw)<0)){toast('Вывод должен быть неотрицательной суммой');return}
+ if(resultRaw===''&&withdrawalRaw===''){toast('Введи результат или сумму вывода');return}
+ const cursor=new Date(rangeStart+'T12:00:00'),last=new Date(rangeEnd+'T12:00:00');
+ while(cursor<=last){const key=iso(cursor),old=actuals[key],result=entryResult(old),withdrawal=entryWithdrawal(old);actuals[key]={result:resultRaw!==''?Number(resultRaw):result,withdrawal:withdrawalRaw!==''?Number(withdrawalRaw):withdrawal};cursor.setDate(cursor.getDate()+1)}
  localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));
  $('calendarRangeEditor').hidden=true;rangeStart=null;rangeEnd=null;calendarEditMode=false;
  $('calendarEditToggle').setAttribute('aria-pressed','false');
  $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
  $('calendarGrid').classList.remove('calendar-edit-mode');
  renderCalendar();toast('Результат сохранён за выбранный период');
+});
+$('calendarRemoveWithdrawal').addEventListener('click',()=>{
+ if(!rangeStart||!rangeEnd){toast('Сначала выбери дату или период');return}
+ const cursor=new Date(rangeStart+'T12:00:00'),last=new Date(rangeEnd+'T12:00:00');
+ while(cursor<=last){const key=iso(cursor),old=actuals[key],result=entryResult(old);if(result===null)delete actuals[key];else actuals[key]={result,withdrawal:null};cursor.setDate(cursor.getDate()+1)}
+ localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));$('calendarWithdrawalAmount').value='';renderCalendar();toast('Вывод удалён за выбранный период');
 });
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
