@@ -294,7 +294,7 @@ function renderWeek(){
  const start=new Date(today);const wd=(start.getDay()+6)%7;start.setDate(start.getDate()-wd);
  $('weekStrip').innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const key=iso(d);return '<div class="week-day '+(key===dateKey?'today':'')+'">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]+'<b>'+d.getDate()+'</b></div>'}).join('');
 }
-$('habitList').addEventListener('click',e=>{if(e.target.id!=='saveTradeResult')return;const input=$('tradeResultInput'),raw=input.value.trim();if(raw===''){delete actuals[selectedDate]}else if(!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}else{actuals[selectedDate]=Number(raw)}localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Финансовый результат сохранён')});
+$('habitList').addEventListener('click',e=>{if(e.target.id!=='saveTradeResult')return;const input=$('tradeResultInput'),raw=input.value.trim();if(raw!==''&&!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}else{const old=actuals[selectedDate],withdrawal=entryWithdrawal(old);if(raw===''){if(withdrawal===null)delete actuals[selectedDate];else actuals[selectedDate]={result:null,withdrawal}}else{actuals[selectedDate]={result:Number(raw),withdrawal}}}localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Финансовый результат сохранён')});
 $('habitList').addEventListener('change',e=>{
  const id=e.target.dataset.input;if(!id)return;
  const d=getDay(dateKey);d[id]=e.target.value;
