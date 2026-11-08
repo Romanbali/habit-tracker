@@ -160,7 +160,7 @@ body{background:#eef1f5;color:#171b22}
 
 
 .calendar-section-head{align-items:center;gap:10px}
-.calendar-edit-toggle{flex:none;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--sage-dark);padding:8px 11px;font-size:13px;font-weight:650}
+.calendar-edit-toggle{flex:none;width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--sage-dark);padding:0;font-size:22px;line-height:1;font-weight:650;cursor:pointer}
 .calendar-edit-toggle[aria-pressed="true"]{background:#dceafe;border-color:#3979c9;color:#174f91}
 #calendarGrid.calendar-edit-mode .cal-day{outline:2px dashed #3979c9;outline-offset:-3px;cursor:crosshair}
 </style>
@@ -179,7 +179,7 @@ body{background:#eef1f5;color:#171b22}
 <div class="section-head"><h2>Твои привычки</h2><span class="section-hint" id="targetHint">Цели на сегодня</span></div>
 <div class="habits" id="habitList"></div>
 <p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
-<div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-pressed="false">✎ Редактировать</button></div>
+<div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-label="Режим редактирования календаря" title="Редактировать любой день" aria-pressed="false">✎</button></div>
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="calendar-grid" id="calendarGrid"></div>
@@ -328,7 +328,8 @@ let calendarEditMode=false;
 $('calendarEditToggle').addEventListener('click',()=>{
  calendarEditMode=!calendarEditMode;
  $('calendarEditToggle').setAttribute('aria-pressed',String(calendarEditMode));
- $('calendarEditToggle').textContent=calendarEditMode?'Выбери день…':'✎ Редактировать';
+ $('calendarEditToggle').textContent='✎';
+ $('calendarEditToggle').setAttribute('aria-label',calendarEditMode?'Выбери день в календаре':'Режим редактирования календаря');
  $('calendarGrid').classList.toggle('calendar-edit-mode',calendarEditMode);
 });
 $('calendarGrid').addEventListener('click',e=>{
@@ -341,7 +342,8 @@ $('calendarGrid').addEventListener('click',e=>{
   $('goalAmount').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';
   calendarEditMode=false;
   $('calendarEditToggle').setAttribute('aria-pressed','false');
-  $('calendarEditToggle').textContent='✎ Редактировать';
+  $('calendarEditToggle').textContent='✎';
+  $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
   $('calendarGrid').classList.remove('calendar-edit-mode');
   $('goalAmount').focus();
   $('goalAmount').scrollIntoView({behavior:'smooth',block:'center'});
