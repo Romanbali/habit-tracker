@@ -335,7 +335,7 @@ function renderCalendar(){
  let out=names.map(n=>'<div class="cal-weekday">'+n+'</div>').join('');
  for(let i=0;i<offset;i++)out+='<div class="cal-day empty"></div>';
  for(let day=1;day<=days;day++){
-  const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),todayKey=dateInZone(new Date(),calendarTimeZone),past=key<todayKey,future=key>todayKey;
+  const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),todayKey=iso(new Date()),past=key<todayKey,future=key>todayKey;
   const rangeLow=rangeStart&&rangeEnd?(rangeStart<rangeEnd?rangeStart:rangeEnd):rangeStart,rangeHigh=rangeStart&&rangeEnd?(rangeStart>rangeEnd?rangeStart:rangeEnd):rangeStart;
   const inRange=calendarEditMode&&rangeLow&&key>=rangeLow&&key<=rangeHigh;
   const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(future?'future ':'')+(inRange?'range-picked ':'')+(key===rangeStart||key===rangeEnd?'range-edge ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
