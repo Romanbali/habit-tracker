@@ -145,6 +145,17 @@ body{background:#eef1f5;color:#171b22}
 .cal-day.traded{outline-color:#5795d6}
 .done-dot{background:#5795d6}
 .legend-dot{border-radius:50%}
+
+/* Calendar: minimal date + actual PnL; past dates are visibly muted */
+.cal-day{background:#f5f7fa;border-color:#e5e9ef;min-height:54px;gap:4px;padding:6px 2px}
+.cal-day small{font-size:10px;line-height:1.1}
+.cal-day .day-goal{display:none}
+.cal-day.past{background:#e7ebf0;color:#737d8a;border-color:#dce2e9}
+.cal-day.past.positive{color:#287447}
+.cal-day.past.negative{color:#b54747}
+.cal-day.selected{background:#dceafe;border-color:#3979c9;color:#174f91}
+.cal-day.past.selected{background:#dceafe;border-color:#3979c9}
+
 </style>
 </head>
 <body>
@@ -298,9 +309,9 @@ function renderCalendar(){
  let out=names.map(n=>'<div class="cal-weekday">'+n+'</div>').join('');
  for(let i=0;i<offset;i++)out+='<div class="cal-day empty"></div>';
  for(let day=1;day<=days;day++){
-  const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),goal=Object.prototype.hasOwnProperty.call(plans,key)?plans[key]:targets(key),traded=!!getDay(key).tradeDone;
-  const cls='cal-day '+(key===selectedDate?'selected ':'')+(traded?'traded ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
-  out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span><small class="day-goal">план '+money(goal)+'</small>'+(has?'<small>'+money(value)+'</small>':'<small>нет итога</small>')+(traded?'<small>✓ занимался</small>':'')+'</button>';
+  const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),todayKey=iso(new Date()),past=key<todayKey;
+  const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
+  out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+money(value)+'</small>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
 
