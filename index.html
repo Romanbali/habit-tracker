@@ -318,7 +318,7 @@ function renderCalendar(){
  $('calendarGrid').innerHTML=out;
 
 }
-$('calendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-date]');if(!b)return;selectedDate=b.dataset.date;const input=$('tradeResultInput');if(input)input.value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';renderCalendar()});
+$('calendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-date]');if(!b)return;selectedDate=b.dataset.date;$('goalFrom').value=selectedDate;$('goalTo').value=selectedDate;$('goalAmount').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';renderCalendar()});
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('saveGoalRange').addEventListener('click',()=>{
