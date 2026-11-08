@@ -127,9 +127,9 @@ h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="calendar-grid" id="calendarGrid"></div>
  <div class="calendar-legend"><span><i class="legend-dot done-dot"></i>Торговал</span><span><i class="legend-dot profit-dot"></i>Плюс</span><span><i class="legend-dot loss-dot"></i>Минус</span></div>
- <div class="range-editor"><b>Дневная цель трейдинга на период</b><p>Это цель по занятию, не по прибыли. Меняй её для нужного диапазона дат — прошлые даты останутся без изменений.</p>
+ <div class="range-editor"><b>Плановый финансовый ориентир на период</b><p>Это только плановая сумма для сравнения с результатом. Цель занятия выполняется отметкой «Трейдинг», независимо от прибыли или убытка.</p>
  <div class="range-fields"><label>С даты<input class="plan-input" id="goalFrom" type="date"></label><label>По дату<input class="plan-input" id="goalTo" type="date"></label></div>
- <div class="plan-row"><label class="grow">Цель в день, $<input class="plan-input" id="goalAmount" type="number" step="0.01" placeholder="30"></label><button type="button" class="plan-save" id="saveGoalRange">Применить</button></div></div>
+ <div class="plan-row"><label class="grow">Плановая сумма в день, $<input class="plan-input" id="goalAmount" type="number" step="0.01" placeholder="30"></label><button type="button" class="plan-save" id="saveGoalRange">Применить</button></div></div>
  <div class="plan-editor"><label id="selectedDateLabel" for="actualResult">Финансовый результат за выбранный день</label>
  <div class="plan-row"><input class="plan-input" id="actualResult" type="number" step="0.01" inputmode="decimal" placeholder="Например, 45 или -12"><button type="button" class="plan-save" id="saveActual">Сохранить</button></div>
  <div class="plan-summary"><span>Цель по занятию</span><b id="selectedGoal">—</b></div><div class="plan-summary"><span>Финансовый итог за месяц</span><b id="monthActual">—</b></div>
@@ -263,7 +263,7 @@ function renderCalendar(){
  for(let day=1;day<=days;day++){
   const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),goal=Object.prototype.hasOwnProperty.call(plans,key)?plans[key]:targets(key),traded=!!getDay(key).tradeDone;
   const cls='cal-day '+(key===selectedDate?'selected ':'')+(traded?'traded ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
-  out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span><small class="day-goal">цель '+money(goal)+'</small>'+(has?'<small>'+money(value)+'</small>':'<small>нет итога</small>')+(traded?'<small>✓ занимался</small>':'')+'</button>';
+  out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span><small class="day-goal">план '+money(goal)+'</small>'+(has?'<small>'+money(value)+'</small>':'<small>нет итога</small>')+(traded?'<small>✓ занимался</small>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
  const label=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'}).format(new Date(selectedDate+'T12:00:00'));
