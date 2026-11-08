@@ -130,10 +130,7 @@ h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
  <div class="range-editor"><b>Плановый финансовый ориентир на период</b><p>Это только плановая сумма для сравнения с результатом. Цель занятия выполняется отметкой «Трейдинг», независимо от прибыли или убытка.</p>
  <div class="range-fields"><label>С даты<input class="plan-input" id="goalFrom" type="date"></label><label>По дату<input class="plan-input" id="goalTo" type="date"></label></div>
  <div class="plan-row"><label class="grow">Плановая сумма в день, $<input class="plan-input" id="goalAmount" type="number" step="0.01" placeholder="30"></label><button type="button" class="plan-save" id="saveGoalRange">Применить</button></div></div>
- <div class="plan-editor"><label id="selectedDateLabel" for="actualResult">Финансовый результат за выбранный день</label>
- <div class="plan-row"><input class="plan-input" id="actualResult" type="number" step="0.01" inputmode="decimal" placeholder="Например, 45 или -12"><button type="button" class="plan-save" id="saveActual">Сохранить</button></div>
- <div class="plan-summary"><span>Цель по занятию</span><b id="selectedGoal">—</b></div><div class="plan-summary"><span>Финансовый итог за месяц</span><b id="monthActual">—</b></div>
- <p class="calendar-status" id="selectedStatus"></p></div>
+
 </div>
 </section>
 <section id="habits" class="tab-panel">
@@ -266,13 +263,7 @@ function renderCalendar(){
   out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span><small class="day-goal">план '+money(goal)+'</small>'+(has?'<small>'+money(value)+'</small>':'<small>нет итога</small>')+(traded?'<small>✓ занимался</small>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
- const label=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'}).format(new Date(selectedDate+'T12:00:00'));
- $('selectedDateLabel').textContent='Финансовый результат · '+label;
- $('actualResult').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';
- $('selectedGoal').textContent=money(Object.prototype.hasOwnProperty.call(plans,selectedDate)?plans[selectedDate]:targets(selectedDate));
- $('selectedStatus').textContent=getDay(selectedDate).tradeDone?'✓ Цель по занятию выполнена — ты торговал.':(selectedDate<dateKey?'Нет отметки о занятии за этот день.':'Отметь трейдинг в привычках. Финансовый результат не влияет на выполнение.');
- const total=Object.keys(actuals).filter(k=>k.startsWith(prefix)).reduce((sum,k)=>sum+Number(actuals[k]||0),0);
- $('monthActual').textContent=money(total);
+
 }
 $('calendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-date]');if(!b)return;selectedDate=b.dataset.date;renderCalendar()});
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
@@ -284,11 +275,7 @@ $('saveGoalRange').addEventListener('click',()=>{
  while(cursor<=last){plans[iso(cursor)]=String(Number(amount));cursor.setDate(cursor.getDate()+1)}
  localStorage.setItem(PLAN_KEY,JSON.stringify(plans));renderCalendar();toast('Цель сохранена на выбранный период')
 });
-$('saveActual').addEventListener('click',()=>{
- const raw=$('actualResult').value.trim();
- if(raw===''){delete actuals[selectedDate]}else if(Number.isFinite(Number(raw))){actuals[selectedDate]=String(Number(raw))}else{toast('Введи корректную сумму');return}
- localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Финансовый результат сохранён')
-});
+
 renderCalendar();
 render();
 })();
