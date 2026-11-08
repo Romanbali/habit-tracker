@@ -148,7 +148,8 @@ body{background:#eef1f5;color:#171b22}
 
 /* Calendar: minimal date + actual PnL; past dates are visibly muted */
 .cal-day{background:#f5f7fa;border-color:#e5e9ef;min-height:54px;gap:4px;padding:6px 2px}
-.cal-day small{font-size:10px;line-height:1.1}
+.cal-day{overflow:visible}
+.cal-day small{font-size:8px;line-height:1.1;white-space:nowrap;letter-spacing:-.35px;max-width:100%;font-weight:700}
 .cal-day .day-goal{display:none}
 .cal-day.past{background:#e7ebf0;color:#737d8a;border-color:#dce2e9}
 .cal-day.past.positive{color:#287447}
