@@ -75,13 +75,24 @@ h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
 .calendar-card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:15px;box-shadow:var(--shadow);margin-top:18px}
 .calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .month-title{font-size:16px;font-weight:700}
-.month-arrow{border:1px solid var(--line);background:var(--bg);border-radius:10px;width:36px;height:34px;font-size:20px}
-.range-editor{margin-top:16px;padding:15px;border-radius:16px;background:#f5f4ef}.range-editor p,.calendar-status{font-size:12px;color:var(--muted);line-height:1.5;margin:7px 0 12px}
-.range-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0}.range-fields label,.grow{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;font-size:11px;color:var(--muted)}
-.cal-day{min-width:0;min-height:68px;padding:5px 2px;overflow:hidden}.cal-day small{font-size:9px;line-height:1.1;font-weight:700;max-width:100%;overflow:hidden}
-.cal-day .day-goal{font-size:9px;color:var(--muted)}.cal-day.positive{background:#e5f0e4;color:#315c39}.cal-day.negative{background:#f8e5e2;color:#a33f35}.cal-day.traded{outline:2px solid #8ba78d}
-.calendar-legend{display:flex;gap:12px;flex-wrap:wrap;margin:12px 2px 3px;font-size:10px;color:var(--muted)}.calendar-legend span{display:flex;align-items:center;gap:5px}.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block}.done-dot{background:var(--sage-dark)}.profit-dot{background:#6e9a70}.loss-dot{background:#c96d61}
-.plan-input{width:100%;box-sizing:border-box}.plan-row{display:flex;align-items:end;gap:9px}.plan-save{border:0;border-radius:12px;padding:12px 15px;background:var(--sage-dark);color:white;font-weight:650;white-space:nowrap}
+.month-arrow{border:1px solid var(--line);background:var(--bg);border-radius:10px;width:36px;height:34px;color:var(--ink);font-size:20px;cursor:pointer}
+.range-editor{margin-top:16px;padding:15px;border-radius:16px;background:#f5f4ef}
+.range-editor p,.calendar-status{font-size:12px;color:var(--muted);line-height:1.5;margin:7px 0 12px}
+.range-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0}
+.range-fields label,.grow{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;font-size:11px;color:var(--muted)}
+.plan-input{width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:10px;font-size:15px;font-weight:600;color:var(--ink)}
+.plan-row{display:flex;align-items:end;gap:9px}
+.plan-save{border:0;border-radius:12px;padding:12px 15px;background:var(--sage-dark);color:white;font-weight:650;white-space:nowrap}
+.cal-day{min-width:0;min-height:70px;padding:5px 1px;overflow:hidden;gap:3px;cursor:pointer}
+.cal-day small{font-size:9px;line-height:1.1;font-weight:650;max-width:100%;overflow:hidden}
+.cal-day .day-goal{font-size:9px;color:var(--muted);font-weight:500}
+.cal-day.positive{background:#e5f0e4;color:#315c39}
+.cal-day.negative{background:#f8e5e2;color:#a33f35}
+.cal-day.traded{outline:2px solid #8ba78d}
+.calendar-legend{display:flex;gap:12px;flex-wrap:wrap;margin:12px 2px 3px;font-size:10px;color:var(--muted)}
+.calendar-legend span{display:flex;align-items:center;gap:5px}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.done-dot{background:var(--sage-dark)}.profit-dot{background:#6e9a70}.loss-dot{background:#c96d61}
 .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 .cal-weekday{text-align:center;font-size:10px;color:var(--muted);padding:4px 0 7px}
 .cal-day{min-height:49px;border:1px solid transparent;border-radius:12px;background:#f7f6f0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ink);font-size:12px}
@@ -113,15 +124,17 @@ h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
 <p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
 <div class="section-head"><h2>Календарь трейдинга</h2><span class="section-hint">Занятие и финансовый итог</span></div>
 <div class="calendar-card">
-<div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth">›</button></div>
-<div class="calendar-grid" id="calendarGrid"></div>
-<div class="calendar-legend"><span><i class="legend-dot done-dot"></i>Торговал</span><span><i class="legend-dot profit-dot"></i>Плюс</span><span><i class="legend-dot loss-dot"></i>Минус</span></div>
-<div class="range-editor"><b>Дневной ориентир на период</b><p>Финансовый ориентир не влияет на выполнение привычки. Изменения применяются только к выбранным датам.</p>
-<div class="range-fields"><label>С даты<input class="plan-input" id="goalFrom" type="date"></label><label>По дату<input class="plan-input" id="goalTo" type="date"></label></div>
-<div class="plan-row"><label class="grow">Ориентир в день, $<input class="plan-input" id="goalAmount" type="number" step="0.01"></label><button class="plan-save" id="saveGoalRange">Применить</button></div></div>
-<div class="plan-editor"><label id="selectedDateLabel" for="actualResult">Фактический финансовый результат</label>
-<div class="plan-row"><input class="plan-input" id="actualResult" type="number" step="0.01" placeholder="45 или -12"><button class="plan-save" id="saveActual">Сохранить</button></div>
-<div class="plan-summary"><span>Ориентир на день</span><b id="selectedGoal"></b></div><div class="plan-summary"><span>Итог за месяц</span><b id="monthActual"></b></div><p class="calendar-status" id="selectedStatus"></p></div></div>
+ <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
+ <div class="calendar-grid" id="calendarGrid"></div>
+ <div class="calendar-legend"><span><i class="legend-dot done-dot"></i>Торговал</span><span><i class="legend-dot profit-dot"></i>Плюс</span><span><i class="legend-dot loss-dot"></i>Минус</span></div>
+ <div class="range-editor"><b>Дневная цель трейдинга на период</b><p>Это цель по занятию, не по прибыли. Меняй её для нужного диапазона дат — прошлые даты останутся без изменений.</p>
+ <div class="range-fields"><label>С даты<input class="plan-input" id="goalFrom" type="date"></label><label>По дату<input class="plan-input" id="goalTo" type="date"></label></div>
+ <div class="plan-row"><label class="grow">Цель в день, $<input class="plan-input" id="goalAmount" type="number" step="0.01" placeholder="30"></label><button type="button" class="plan-save" id="saveGoalRange">Применить</button></div></div>
+ <div class="plan-editor"><label id="selectedDateLabel" for="actualResult">Финансовый результат за выбранный день</label>
+ <div class="plan-row"><input class="plan-input" id="actualResult" type="number" step="0.01" inputmode="decimal" placeholder="Например, 45 или -12"><button type="button" class="plan-save" id="saveActual">Сохранить</button></div>
+ <div class="plan-summary"><span>Цель по занятию</span><b id="selectedGoal">—</b></div><div class="plan-summary"><span>Финансовый итог за месяц</span><b id="monthActual">—</b></div>
+ <p class="calendar-status" id="selectedStatus"></p></div>
+</div>
 </section>
 <section id="habits" class="tab-panel">
 <div class="eyebrow">Твой ритм</div><h1>Привычки</h1>
@@ -190,7 +203,7 @@ function render(){
  $('balanceValue').textContent='$'+balance().toLocaleString('en-US');$('balanceNote').textContent='Старт $185 · +$30 за достижение цели трейдинга';
  $('targetHint').textContent='Цели: $'+target+' / '+target+' повторения';
  const items=[
-  {id:'trade',name:'Трейдинг',meta:'Занимался сегодня',unit:'',value:'',done:d.tradeDone,placeholder:'',icon:icons.trade},
+  {id:'trade',name:'Трейдинг',meta:'Выполни занятие',unit:'',value:'',done:d.tradeDone,placeholder:'',icon:icons.trade},
   {id:'pushups',name:'Отжимания',meta:'Дневная цель '+target+' повторений',unit:'раз',value:d.pushups,done:d.pushDone,placeholder:'0',icon:icons.push},
   {id:'meditation',name:'Медитация',meta:'Спокойствие · 1 минута',unit:'мин',value:d.meditation,done:d.medDone,placeholder:'0',icon:icons.med}
  ];
@@ -235,23 +248,46 @@ $('resetData').addEventListener('click',()=>{
  if(confirm('Удалить все отметки и вернуть баланс к $185?')){store={days:{}};save();render();toast('Данные сброшены')}
 });
 
-const PLAN_KEY='nordic-trading-plan-v1',ACTUAL_KEY='nordic-trading-actual-v1';let plans={},actuals={};
-try{plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{}}catch(e){}try{actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{}}catch(e){}
+const PLAN_KEY='nordic-trading-plan-v1',ACTUAL_KEY='nordic-trading-actual-v1';
+let plans={},actuals={};
+try{plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{}}catch(e){}
+try{actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{}}catch(e){}
 let viewMonth=new Date(today.getFullYear(),today.getMonth(),1),selectedDate=dateKey;
-const money=n=>{let v=Number(n||0);return(v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:2})};
-function renderCalendar(){const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';$('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);const first=new Date(y,m,1),offset=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),names=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];let out=names.map(n=>'<div class="cal-weekday">'+n+'</div>').join('');for(let i=0;i<offset;i++)out+='<div class="cal-day empty"></div>';for(let day=1;day<=days;day++){const k=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,k),v=Number(actuals[k]),g=Object.prototype.hasOwnProperty.call(plans,k)?plans[k]:targets(k),done=!!getDay(k).tradeDone,cl='cal-day '+(k===selectedDate?'selected ':'')+(done?'traded ':'')+(has&&v<0?'negative':has&&v>0?'positive':'');out+='<button class="'+cl+'" data-date="'+k+'"><span>'+day+'</span><small class="day-goal">цель '+money(g)+'</small>'+(has?'<small>'+money(v)+'</small>':'<small>—</small>')+(done?'<small>✓ трейдинг</small>':'')+'</button>'}$('calendarGrid').innerHTML=out;const label=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'}).format(new Date(selectedDate+'T12:00:00'));$('selectedDateLabel').textContent='Финансовый результат · '+label;$('actualResult').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';$('selectedGoal').textContent=money(Object.prototype.hasOwnProperty.call(plans,selectedDate)?plans[selectedDate]:targets(selectedDate));$('selectedStatus').textContent=getDay(selectedDate).tradeDone?'Цель занятия выполнена: ты торговал.':(selectedDate<dateKey?'Нет отметки о занятии за этот день.':'Отметь трейдинг в привычках — сумма не влияет на выполнение.');$('monthActual').textContent=money(Object.keys(actuals).filter(k=>k.startsWith(prefix)).reduce((s,k)=>s+Number(actuals[k]||0),0))}
-$('calendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-date]');if(b){selectedDate=b.dataset.date;renderCalendar()}});
-$('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});$('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
-$('saveGoalRange').addEventListener('click',()=>{const f=$('goalFrom').value,t=$('goalTo').value,v=$('goalAmount').value.trim();if(!f||!t||f>t||v===''||!Number.isFinite(Number(v))){toast('Проверь даты и ориентир');return}let d=new Date(f+'T12:00:00'),last=new Date(t+'T12:00:00');while(d<=last){plans[iso(d)]=String(Number(v));d.setDate(d.getDate()+1)}localStorage.setItem(PLAN_KEY,JSON.stringify(plans));renderCalendar();toast('Ориентир сохранён')});
-$('saveActual').addEventListener('click',()=>{const v=$('actualResult').value.trim();if(v==='')delete actuals[selectedDate];else if(Number.isFinite(Number(v)))actuals[selectedDate]=String(Number(v));else{toast('Некорректная сумма');return}localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Результат сохранён')});
-
+const money=n=>{const v=Number(n||0);return(v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:2})};
+function renderCalendar(){
+ const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
+ $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
+ const first=new Date(y,m,1),offset=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),names=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+ let out=names.map(n=>'<div class="cal-weekday">'+n+'</div>').join('');
+ for(let i=0;i<offset;i++)out+='<div class="cal-day empty"></div>';
+ for(let day=1;day<=days;day++){
+  const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),goal=Object.prototype.hasOwnProperty.call(plans,key)?plans[key]:targets(key),traded=!!getDay(key).tradeDone;
+  const cls='cal-day '+(key===selectedDate?'selected ':'')+(traded?'traded ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
+  out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span><small class="day-goal">цель '+money(goal)+'</small>'+(has?'<small>'+money(value)+'</small>':'<small>нет итога</small>')+(traded?'<small>✓ занимался</small>':'')+'</button>';
+ }
+ $('calendarGrid').innerHTML=out;
+ const label=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'}).format(new Date(selectedDate+'T12:00:00'));
+ $('selectedDateLabel').textContent='Финансовый результат · '+label;
+ $('actualResult').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';
+ $('selectedGoal').textContent=money(Object.prototype.hasOwnProperty.call(plans,selectedDate)?plans[selectedDate]:targets(selectedDate));
+ $('selectedStatus').textContent=getDay(selectedDate).tradeDone?'✓ Цель по занятию выполнена — ты торговал.':(selectedDate<dateKey?'Нет отметки о занятии за этот день.':'Отметь трейдинг в привычках. Финансовый результат не влияет на выполнение.');
+ const total=Object.keys(actuals).filter(k=>k.startsWith(prefix)).reduce((sum,k)=>sum+Number(actuals[k]||0),0);
+ $('monthActual').textContent=money(total);
+}
+$('calendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-date]');if(!b)return;selectedDate=b.dataset.date;renderCalendar()});
+$('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
+$('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
+$('saveGoalRange').addEventListener('click',()=>{
+ const from=$('goalFrom').value,to=$('goalTo').value,amount=$('goalAmount').value.trim();
+ if(!from||!to||from>to||amount===''||!Number.isFinite(Number(amount))||Number(amount)<0){toast('Проверь даты и дневную цель');return}
+ const cursor=new Date(from+'T12:00:00'),last=new Date(to+'T12:00:00');
+ while(cursor<=last){plans[iso(cursor)]=String(Number(amount));cursor.setDate(cursor.getDate()+1)}
+ localStorage.setItem(PLAN_KEY,JSON.stringify(plans));renderCalendar();toast('Цель сохранена на выбранный период')
 });
-$('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=viewMonth.getFullYear()+'-'+String(viewMonth.getMonth()+1).padStart(2,'0')+'-01';renderCalendar()});
-$('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=viewMonth.getFullYear()+'-'+String(viewMonth.getMonth()+1).padStart(2,'0')+'-01';renderCalendar()});
-$('savePlan').addEventListener('click',()=>{
- const v=$('plannedIncome').value.trim();
- if(v===''||Number(v)===0)delete plans[selectedDate];else if(Number(v)>=0)plans[selectedDate]=String(Number(v));
- localStorage.setItem(PLAN_KEY,JSON.stringify(plans));renderCalendar();toast('План сохранён');
+$('saveActual').addEventListener('click',()=>{
+ const raw=$('actualResult').value.trim();
+ if(raw===''){delete actuals[selectedDate]}else if(Number.isFinite(Number(raw))){actuals[selectedDate]=String(Number(raw))}else{toast('Введи корректную сумму');return}
+ localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Финансовый результат сохранён')
 });
 renderCalendar();
 render();
