@@ -173,7 +173,7 @@ body{background:#eef1f5;color:#171b22}
 .calendar-range-fields input,.calendar-range-fields select{display:block;width:100%;margin-top:6px;box-sizing:border-box;border:1px solid var(--line);border-radius:11px;padding:10px;background:#fff;color:var(--ink);font-size:14px}
 .calendar-edit-balance{font-size:11px;color:var(--muted);margin:-3px 0 10px}
 .cal-day.withdrawal{background:#e9eafa!important;color:#4c4d91!important;border-color:#d6d8f2!important}
-.cal-day.withdrawal small{color:#4c4d91!important;font-size:8px!important}
+.cal-day .withdrawal-label{color:#4c4d91!important;font-size:8px!important}
 .calendar-range-fields button{border:0;border-radius:11px;background:var(--sage-dark);color:#fff;padding:12px 15px;font-weight:650}
 .cal-day.range-picked{background:#e5effd;border-color:#9bbce8}
 .cal-day.range-edge{outline:2px solid #3979c9;outline-offset:-2px}
@@ -285,7 +285,7 @@ function render(){
   {id:'pushups',name:'Отжимания',meta:'Дневная цель '+target+' повторений',unit:'раз',value:d.pushups,done:d.pushDone,placeholder:'0',icon:icons.push},
   {id:'meditation',name:'Медитация',meta:'Спокойствие · 1 минута',unit:'мин',value:d.meditation,done:d.medDone,placeholder:'0',icon:icons.med}
  ];
- $('habitList').innerHTML=items.map(it=>'<article class="habit '+(it.done?'done':'')+'"><div class="habit-icon">'+it.icon+'</div><div class="habit-main"><div class="habit-name">'+it.name+'</div><div class="habit-meta">'+it.meta+'</div>'+(it.id==='trade'?'<div class="trade-result"><input type="number" step="0.01" inputmode="decimal" placeholder="PnL, например −12" aria-label="Финансовый результат за выбранную дату" id="tradeResultInput" value="'+(Object.prototype.hasOwnProperty.call(actuals,selectedDate)&&entryType(actuals[selectedDate])==='result'?entryAmount(actuals[selectedDate]):'')+'"><button type="button" id="saveTradeResult">Сохранить</button></div>':'')+'</div><div class="habit-control">'+(it.id==='trade'?'':'<input class="amount" inputmode="decimal" type="number" min="0" step="1" placeholder="'+it.placeholder+'" aria-label="'+it.name+'" data-input="'+it.id+'" value="'+String(it.value).replace(/"/g,'&quot;')+'"><span class="unit">'+it.unit+'</span>')+'<button class="check" type="button" aria-label="Отметить '+it.name+'" aria-pressed="'+it.done+'" data-check="'+it.id+'"></button></div></article>').join('');
+ $('habitList').innerHTML=items.map(it=>'<article class="habit '+(it.done?'done':'')+'"><div class="habit-icon">'+it.icon+'</div><div class="habit-main"><div class="habit-name">'+it.name+'</div><div class="habit-meta">'+it.meta+'</div>'+(it.id==='trade'?'<div class="trade-result"><input type="number" step="0.01" inputmode="decimal" placeholder="PnL, например −12" aria-label="Финансовый результат за выбранную дату" id="tradeResultInput" value="'+(entryResult(actuals[selectedDate])??'')+'"><button type="button" id="saveTradeResult">Сохранить</button></div>':'')+'</div><div class="habit-control">'+(it.id==='trade'?'':'<input class="amount" inputmode="decimal" type="number" min="0" step="1" placeholder="'+it.placeholder+'" aria-label="'+it.name+'" data-input="'+it.id+'" value="'+String(it.value).replace(/"/g,'&quot;')+'"><span class="unit">'+it.unit+'</span>')+'<button class="check" type="button" aria-label="Отметить '+it.name+'" aria-pressed="'+it.done+'" data-check="'+it.id+'"></button></div></article>').join('');
  $('tradeTarget').textContent='$'+target;$('pushTarget').textContent=target;
  $('statsToday').textContent=count+' / 3';$('statsDays').textContent=completedDays();$('statsBalance').textContent='$'+balance().toLocaleString('en-US');
  renderWeek();
@@ -334,8 +334,8 @@ try{actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{}}catch(e){}
 let viewMonth=new Date(today.getFullYear(),today.getMonth(),1),selectedDate=dateKey;
 const money=n=>{const v=Number(n||0);return(v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:2})};
 const entryAmount=v=>Number(v&&typeof v==='object'?v.amount:v);
-const entryType=v=>v&&typeof v==='object'&&v.type==='withdrawal'?'withdrawal':'result';
-const entryLabel=v=>entryType(v)==='withdrawal'?'↗ Вывод '+money(entryAmount(v)):money(entryAmount(v));
+const entryResult=v=>{if(v==null)return null;if(typeof v!=='object')return Number(v);if(v.type==='withdrawal')return null;if(Object.prototype.hasOwnProperty.call(v,'result'))return v.result==null?null:Number(v.result);return v.type==='result'?entryAmount(v):null};
+const entryWithdrawal=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'withdrawal'))return v.withdrawal==null?null:Number(v.withdrawal);return v.type==='withdrawal'?entryAmount(v):null};
 function renderCalendar(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
  $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
@@ -343,11 +343,11 @@ function renderCalendar(){
  let out=names.map(n=>'<div class="cal-weekday">'+n+'</div>').join('');
  for(let i=0;i<offset;i++)out+='<div class="cal-day empty"></div>';
  for(let day=1;day<=days;day++){
-  const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),entry=actuals[key],value=entryAmount(entry),withdrawal=has&&entryType(entry)==='withdrawal',todayKey=iso(new Date()),past=key<todayKey,future=key>todayKey;
+  const key=prefix+String(day).padStart(2,'0'),entry=actuals[key],result=entryResult(entry),withdrawalAmount=entryWithdrawal(entry),hasResult=result!==null&&Number.isFinite(result),hasWithdrawal=withdrawalAmount!==null&&Number.isFinite(withdrawalAmount),has=hasResult||hasWithdrawal,todayKey=iso(new Date()),past=key<todayKey,future=key>todayKey;
   const rangeLow=rangeStart&&rangeEnd?(rangeStart<rangeEnd?rangeStart:rangeEnd):rangeStart,rangeHigh=rangeStart&&rangeEnd?(rangeStart>rangeEnd?rangeStart:rangeEnd):rangeStart;
   const inRange=calendarEditMode&&rangeLow&&key>=rangeLow&&key<=rangeHigh;
-  const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(future?'future ':'')+(inRange?'range-picked ':'')+(key===rangeStart||key===rangeEnd?'range-edge ':'')+(withdrawal?'withdrawal ':has&&value<0?'negative ':has&&value>0?'positive ':'');
-  out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+entryLabel(entry)+'</small>':'')+'</button>';
+  const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(future?'future ':'')+(inRange?'range-picked ':'')+(key===rangeStart||key===rangeEnd?'range-edge ':'')+(hasResult&&result<0?'negative ':hasResult&&result>0?'positive ':'');
+  out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span>'+(hasResult?'<small>'+money(result)+'</small>':'')+(hasWithdrawal?'<small class="withdrawal-label">↗ Вывод '+money(withdrawalAmount)+'</small>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
 
@@ -371,7 +371,7 @@ $('calendarGrid').addEventListener('click',e=>{
   else{rangeEnd=selectedDate;if(rangeEnd<rangeStart){const swap=rangeStart;rangeStart=rangeEnd;rangeEnd=swap;}
    const fmt=x=>new Date(x+'T12:00:00').toLocaleDateString('ru-RU');
    $('calendarRangeCaption').textContent=rangeStart===rangeEnd?'Результат за '+fmt(rangeStart):'Период: '+fmt(rangeStart)+' — '+fmt(rangeEnd);
-   const existing=actuals[rangeStart];$('calendarRangeAmount').value=Object.prototype.hasOwnProperty.call(actuals,rangeStart)?entryAmount(existing):'';$('calendarRangeType').value=entryType(existing);$('calendarEditBalance').textContent='Баланс цели: $'+balance().toLocaleString('en-US');
+   const existing=actuals[rangeStart],chosenType=$('calendarRangeType').value,existingValue=chosenType==='withdrawal'?entryWithdrawal(existing):entryResult(existing);$('calendarRangeAmount').value=existingValue??'';$('calendarEditBalance').textContent='Баланс цели: $'+balance().toLocaleString('en-US');
    $('calendarRangeEditor').hidden=false;
   }
  }else{renderCalendar();return;}
@@ -381,8 +381,8 @@ $('calendarRangeSave').addEventListener('click',()=>{
  if(!rangeStart||!rangeEnd){toast('Выбери начало и конец периода');return}
  const raw=$('calendarRangeAmount').value.trim(),type=$('calendarRangeType').value;
  if(raw===''||!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}
- const amount=Number(raw),entry=type==='withdrawal'?{type:'withdrawal',amount}:{type:'result',amount},cursor=new Date(rangeStart+'T12:00:00'),last=new Date(rangeEnd+'T12:00:00');
- while(cursor<=last){actuals[iso(cursor)]=entry;cursor.setDate(cursor.getDate()+1)}
+ const amount=Number(raw),cursor=new Date(rangeStart+'T12:00:00'),last=new Date(rangeEnd+'T12:00:00');
+ while(cursor<=last){const key=iso(cursor),old=actuals[key],result=entryResult(old),withdrawal=entryWithdrawal(old);actuals[key]={result:type==='result'?amount:result,withdrawal:type==='withdrawal'?amount:withdrawal};cursor.setDate(cursor.getDate()+1)}
  localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));
  $('calendarRangeEditor').hidden=true;rangeStart=null;rangeEnd=null;calendarEditMode=false;
  $('calendarEditToggle').setAttribute('aria-pressed','false');
