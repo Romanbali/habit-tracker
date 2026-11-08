@@ -376,13 +376,7 @@ $('calendarRangeSave').addEventListener('click',()=>{
 });
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
-$('saveGoalRange').addEventListener('click',()=>{
- const from=$('goalFrom').value,to=$('goalTo').value,raw=$('goalAmount').value.trim();
- if(!from||!to||from>to||raw===''||!Number.isFinite(Number(raw))){toast('Проверь даты и сумму результата');return}
- const amount=Number(raw),cursor=new Date(from+'T12:00:00'),last=new Date(to+'T12:00:00');
- while(cursor<=last){actuals[iso(cursor)]=amount;cursor.setDate(cursor.getDate()+1)}
- localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Результат сохранён за выбранный период')
-});
+
 
 renderCalendar();
 render();
