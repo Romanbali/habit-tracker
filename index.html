@@ -163,6 +163,16 @@ body{background:#eef1f5;color:#171b22}
 .calendar-edit-toggle{flex:none;width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--sage-dark);padding:0;font-size:22px;line-height:1;font-weight:650;cursor:pointer}
 .calendar-edit-toggle[aria-pressed="true"]{background:#dceafe;border-color:#3979c9;color:#174f91}
 #calendarGrid.calendar-edit-mode .cal-day{outline:2px dashed #3979c9;outline-offset:-3px;cursor:crosshair}
+
+.calendar-range-editor{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#f4f7fb}
+.calendar-range-editor[hidden]{display:none}
+.calendar-range-caption{font-size:14px;font-weight:650;color:var(--ink);margin-bottom:10px}
+.calendar-range-fields{display:flex;align-items:end;gap:10px}
+.calendar-range-fields label{flex:1;min-width:0;font-size:12px;color:var(--muted)}
+.calendar-range-fields input{display:block;width:100%;margin-top:6px;box-sizing:border-box;border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff;color:var(--ink);font-size:16px}
+.calendar-range-fields button{border:0;border-radius:11px;background:var(--sage-dark);color:#fff;padding:12px 15px;font-weight:650}
+.cal-day.range-picked{background:#e5effd;border-color:#9bbce8}
+.cal-day.range-edge{outline:2px solid #3979c9;outline-offset:-2px}
 </style>
 </head>
 <body>
@@ -185,9 +195,10 @@ body{background:#eef1f5;color:#171b22}
  <div class="calendar-grid" id="calendarGrid"></div>
 
  <div class="calendar-legend"><span><i class="legend-dot done-dot"></i>Торговал</span><span><i class="legend-dot profit-dot"></i>Плюс</span><span><i class="legend-dot loss-dot"></i>Минус</span></div>
- <div class="range-editor"><b>Финансовый результат за период</b><p>Укажи диапазон дат и сумму заработка за каждый день. Чтобы изменить один день, выбери одинаковые даты «С» и «По».</p>
- <div class="range-fields"><label>С даты<input class="plan-input" id="goalFrom" type="date"></label><label>По дату<input class="plan-input" id="goalTo" type="date"></label></div>
- <div class="plan-row"><label class="grow">Результат за день, $<input class="plan-input" id="goalAmount" type="number" step="0.01" placeholder="Например, 45 или −12"></label><button type="button" class="plan-save" id="saveGoalRange">Сохранить</button></div></div>
+ <div class="calendar-range-editor" id="calendarRangeEditor" hidden>
+  <div class="calendar-range-caption" id="calendarRangeCaption">Выбери первый день периода</div>
+  <div class="calendar-range-fields"><label>Результат за каждый день, $<input id="calendarRangeAmount" type="number" step="0.01" inputmode="decimal" placeholder="Например, 45 или −12"></label><button type="button" id="calendarRangeSave">Сохранить</button></div>
+ </div>
 
 </div>
 </section>
@@ -318,37 +329,50 @@ function renderCalendar(){
  for(let i=0;i<offset;i++)out+='<div class="cal-day empty"></div>';
  for(let day=1;day<=days;day++){
   const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),todayKey=iso(new Date()),past=key<todayKey;
-  const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
+  const rangeLow=rangeStart&&rangeEnd?(rangeStart<rangeEnd?rangeStart:rangeEnd):rangeStart,rangeHigh=rangeStart&&rangeEnd?(rangeStart>rangeEnd?rangeStart:rangeEnd):rangeStart;
+  const inRange=calendarEditMode&&rangeLow&&key>=rangeLow&&key<=rangeHigh;
+  const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(inRange?'range-picked ':'')+(key===rangeStart||key===rangeEnd?'range-edge ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
   out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+money(value)+'</small>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
 
 }
-let calendarEditMode=false;
+let calendarEditMode=false,rangeStart=null,rangeEnd=null;
 $('calendarEditToggle').addEventListener('click',()=>{
- calendarEditMode=!calendarEditMode;
+ calendarEditMode=!calendarEditMode;rangeStart=null;rangeEnd=null;
  $('calendarEditToggle').setAttribute('aria-pressed',String(calendarEditMode));
- $('calendarEditToggle').textContent='✎';
- $('calendarEditToggle').setAttribute('aria-label',calendarEditMode?'Выбери день в календаре':'Режим редактирования календаря');
+ $('calendarEditToggle').setAttribute('aria-label',calendarEditMode?'Выбери начало периода':'Режим редактирования календаря');
  $('calendarGrid').classList.toggle('calendar-edit-mode',calendarEditMode);
+ $('calendarRangeEditor').hidden=true;
+ if(calendarEditMode)toast('Выбери первый день периода');
+ renderCalendar();
 });
 $('calendarGrid').addEventListener('click',e=>{
- const day=e.target.closest('[data-date]');
- if(!day)return;
+ const day=e.target.closest('[data-date]');if(!day)return;
  selectedDate=day.dataset.date;
  if(calendarEditMode){
-  $('goalFrom').value=selectedDate;
-  $('goalTo').value=selectedDate;
-  $('goalAmount').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';
-  calendarEditMode=false;
-  $('calendarEditToggle').setAttribute('aria-pressed','false');
-  $('calendarEditToggle').textContent='✎';
-  $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
-  $('calendarGrid').classList.remove('calendar-edit-mode');
-  $('goalAmount').focus();
-  $('goalAmount').scrollIntoView({behavior:'smooth',block:'center'});
- }
+  if(!rangeStart||rangeEnd){rangeStart=selectedDate;rangeEnd=null;$('calendarRangeEditor').hidden=true;$('calendarRangeCaption').textContent='Начало: '+new Date(rangeStart+'T12:00:00').toLocaleDateString('ru-RU')+' · выбери конец периода';}
+  else{rangeEnd=selectedDate;if(rangeEnd<rangeStart){const swap=rangeStart;rangeStart=rangeEnd;rangeEnd=swap;}
+   const fmt=x=>new Date(x+'T12:00:00').toLocaleDateString('ru-RU');
+   $('calendarRangeCaption').textContent=rangeStart===rangeEnd?'Результат за '+fmt(rangeStart):'Период: '+fmt(rangeStart)+' — '+fmt(rangeEnd);
+   $('calendarRangeAmount').value=Object.prototype.hasOwnProperty.call(actuals,rangeStart)?actuals[rangeStart]:'';
+   $('calendarRangeEditor').hidden=false;
+  }
+ }else{renderCalendar();return;}
  renderCalendar();
+});
+$('calendarRangeSave').addEventListener('click',()=>{
+ if(!rangeStart||!rangeEnd){toast('Выбери начало и конец периода');return}
+ const raw=$('calendarRangeAmount').value.trim();
+ if(raw===''||!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}
+ const amount=Number(raw),cursor=new Date(rangeStart+'T12:00:00'),last=new Date(rangeEnd+'T12:00:00');
+ while(cursor<=last){actuals[iso(cursor)]=amount;cursor.setDate(cursor.getDate()+1)}
+ localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));
+ $('calendarRangeEditor').hidden=true;rangeStart=null;rangeEnd=null;calendarEditMode=false;
+ $('calendarEditToggle').setAttribute('aria-pressed','false');
+ $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
+ $('calendarGrid').classList.remove('calendar-edit-mode');
+ renderCalendar();toast('Результат сохранён за выбранный период');
 });
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
