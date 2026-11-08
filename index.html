@@ -158,10 +158,11 @@ body{background:#eef1f5;color:#171b22}
 
 
 
-.calendar-grid .cal-cell{position:relative;min-width:0}
-.calendar-grid .cal-cell .cal-day{width:100%;height:100%;min-height:70px}
-.cal-edit{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;border:0;border-radius:6px;background:rgba(255,255,255,.88);color:#3979c9;font-size:14px;line-height:20px;display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;box-shadow:0 1px 3px rgba(20,35,55,.12)}
-.cal-edit:focus-visible{outline:2px solid #3979c9;outline-offset:1px}
+
+.calendar-section-head{align-items:center;gap:10px}
+.calendar-edit-toggle{flex:none;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--sage-dark);padding:8px 11px;font-size:13px;font-weight:650}
+.calendar-edit-toggle[aria-pressed="true"]{background:#dceafe;border-color:#3979c9;color:#174f91}
+#calendarGrid.calendar-edit-mode .cal-day{outline:2px dashed #3979c9;outline-offset:-3px;cursor:crosshair}
 </style>
 </head>
 <body>
@@ -178,7 +179,7 @@ body{background:#eef1f5;color:#171b22}
 <div class="section-head"><h2>Твои привычки</h2><span class="section-hint" id="targetHint">Цели на сегодня</span></div>
 <div class="habits" id="habitList"></div>
 <p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
-<div class="section-head"><h2>Календарь трейдинга</h2><span class="section-hint">Занятие и финансовый итог</span></div>
+<div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-pressed="false">✎ Редактировать</button></div>
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="calendar-grid" id="calendarGrid"></div>
@@ -318,22 +319,34 @@ function renderCalendar(){
  for(let day=1;day<=days;day++){
   const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),todayKey=iso(new Date()),past=key<todayKey;
   const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
-  out+='<div class="cal-cell"><button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+money(value)+'</small>':'')+'</button><button type="button" class="cal-edit" data-edit-date="'+key+'" aria-label="Редактировать результат за '+day+' число">✎</button></div>';
+  out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+money(value)+'</small>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
 
 }
+let calendarEditMode=false;
+$('calendarEditToggle').addEventListener('click',()=>{
+ calendarEditMode=!calendarEditMode;
+ $('calendarEditToggle').setAttribute('aria-pressed',String(calendarEditMode));
+ $('calendarEditToggle').textContent=calendarEditMode?'Выбери день…':'✎ Редактировать';
+ $('calendarGrid').classList.toggle('calendar-edit-mode',calendarEditMode);
+});
 $('calendarGrid').addEventListener('click',e=>{
- const edit=e.target.closest('[data-edit-date]');
  const day=e.target.closest('[data-date]');
- const key=edit?edit.dataset.editDate:day?.dataset.date;
- if(!key)return;
- selectedDate=key;
- $('goalFrom').value=selectedDate;
- $('goalTo').value=selectedDate;
- $('goalAmount').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';
+ if(!day)return;
+ selectedDate=day.dataset.date;
+ if(calendarEditMode){
+  $('goalFrom').value=selectedDate;
+  $('goalTo').value=selectedDate;
+  $('goalAmount').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';
+  calendarEditMode=false;
+  $('calendarEditToggle').setAttribute('aria-pressed','false');
+  $('calendarEditToggle').textContent='✎ Редактировать';
+  $('calendarGrid').classList.remove('calendar-edit-mode');
+  $('goalAmount').focus();
+  $('goalAmount').scrollIntoView({behavior:'smooth',block:'center'});
+ }
  renderCalendar();
- if(edit){$('goalAmount').focus();$('goalAmount').scrollIntoView({behavior:'smooth',block:'center'});}
 });
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
