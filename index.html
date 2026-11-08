@@ -332,7 +332,10 @@ let plans={},actuals={};
 try{plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{}}catch(e){}
 try{actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{}}catch(e){}
 let viewMonth=new Date(today.getFullYear(),today.getMonth(),1),selectedDate=dateKey;
-const money=n=>{const v=Number(n||0);return(v<0?'−':'')+'
+const money=n=>{const v=Number(n||0);return (v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:2})};
+const entryAmount=v=>Number(v&&typeof v==='object'?v.amount:v);
+const entryType=v=>v&&typeof v==='object'&&v.type==='withdrawal'?'withdrawal':'result';
+const entryLabel=v=>entryType(v)==='withdrawal'?'↗ Вывод '+money(entryAmount(v)):money(entryAmount(v));
 function renderCalendar(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
  $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
