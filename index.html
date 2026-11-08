@@ -157,6 +157,11 @@ body{background:#eef1f5;color:#171b22}
 .cal-day.past.selected{background:#dceafe;border-color:#3979c9}
 
 
+
+.calendar-grid .cal-cell{position:relative;min-width:0}
+.calendar-grid .cal-cell .cal-day{width:100%;height:100%;min-height:70px}
+.cal-edit{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;border:0;border-radius:6px;background:rgba(255,255,255,.88);color:#3979c9;font-size:14px;line-height:20px;display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;box-shadow:0 1px 3px rgba(20,35,55,.12)}
+.cal-edit:focus-visible{outline:2px solid #3979c9;outline-offset:1px}
 </style>
 </head>
 <body>
@@ -313,12 +318,23 @@ function renderCalendar(){
  for(let day=1;day<=days;day++){
   const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),todayKey=iso(new Date()),past=key<todayKey;
   const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
-  out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+money(value)+'</small>':'')+'</button>';
+  out+='<div class="cal-cell"><button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+money(value)+'</small>':'')+'</button><button type="button" class="cal-edit" data-edit-date="'+key+'" aria-label="Редактировать результат за '+day+' число">✎</button></div>';
  }
  $('calendarGrid').innerHTML=out;
 
 }
-$('calendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-date]');if(!b)return;selectedDate=b.dataset.date;$('goalFrom').value=selectedDate;$('goalTo').value=selectedDate;$('goalAmount').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';renderCalendar()});
+$('calendarGrid').addEventListener('click',e=>{
+ const edit=e.target.closest('[data-edit-date]');
+ const day=e.target.closest('[data-date]');
+ const key=edit?edit.dataset.editDate:day?.dataset.date;
+ if(!key)return;
+ selectedDate=key;
+ $('goalFrom').value=selectedDate;
+ $('goalTo').value=selectedDate;
+ $('goalAmount').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';
+ renderCalendar();
+ if(edit){$('goalAmount').focus();$('goalAmount').scrollIntoView({behavior:'smooth',block:'center'});}
+});
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('saveGoalRange').addEventListener('click',()=>{
