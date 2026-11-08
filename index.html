@@ -202,7 +202,7 @@ body{background:#eef1f5;color:#171b22}
  <div class="calendar-range-editor" id="calendarRangeEditor" hidden>
   <div class="calendar-range-caption" id="calendarRangeCaption">Выбери первый день периода</div>
   <div id="calendarEditBalance" class="calendar-edit-balance"></div>
-  <div class="calendar-range-fields"><label>Тип записи<select id="calendarRangeType"><option value="result">Результат дня</option><option value="withdrawal">Вывод средств</option></select></label><label>Сумма, $<input id="calendarRangeAmount" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Например, 45"></label><button type="button" id="calendarRangeSave">Сохранить</button></div>
+  <div class="calendar-range-fields"><label>Тип записи<select id="calendarRangeType"><option value="result">Результат дня</option><option value="withdrawal">Вывод средств</option></select></label><label>Сумма, $<input id="calendarRangeAmount" type="number" step="0.01" inputmode="decimal" placeholder="Например, 45 или −12"></label><button type="button" id="calendarRangeSave">Сохранить</button></div>
  </div>
  <div class="calendar-grid" id="calendarGrid"></div>
 
@@ -332,10 +332,7 @@ let plans={},actuals={};
 try{plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{}}catch(e){}
 try{actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{}}catch(e){}
 let viewMonth=new Date(today.getFullYear(),today.getMonth(),1),selectedDate=dateKey;
-const money=n=>{const v=Number(n||0);return (v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:2})};
-const entryAmount=v=>Number(v&&typeof v==='object'?v.amount:v);
-const entryType=v=>v&&typeof v==='object'&&v.type==='withdrawal'?'withdrawal':'result';
-const entryLabel=v=>entryType(v)==='withdrawal'?'↗ Вывод '+money(entryAmount(v)):money(entryAmount(v));
+const money=n=>{const v=Number(n||0);return(v<0?'−':'')+'
 function renderCalendar(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
  $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
@@ -372,7 +369,6 @@ $('calendarGrid').addEventListener('click',e=>{
    const fmt=x=>new Date(x+'T12:00:00').toLocaleDateString('ru-RU');
    $('calendarRangeCaption').textContent=rangeStart===rangeEnd?'Результат за '+fmt(rangeStart):'Период: '+fmt(rangeStart)+' — '+fmt(rangeEnd);
    const existing=actuals[rangeStart];$('calendarRangeAmount').value=Object.prototype.hasOwnProperty.call(actuals,rangeStart)?entryAmount(existing):'';$('calendarRangeType').value=entryType(existing);$('calendarEditBalance').textContent='Баланс цели: 
-   $('calendarRangeEditor').hidden=false;
   }
  }else{renderCalendar();return;}
  renderCalendar();
@@ -380,7 +376,7 @@ $('calendarGrid').addEventListener('click',e=>{
 $('calendarRangeSave').addEventListener('click',()=>{
  if(!rangeStart||!rangeEnd){toast('Выбери начало и конец периода');return}
  const raw=$('calendarRangeAmount').value.trim(),type=$('calendarRangeType').value;
- if(raw===''||!Number.isFinite(Number(raw))||Number(raw)<0){toast('Введи корректную положительную сумму');return}
+ if(raw===''||!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}
  const amount=Number(raw),entry=type==='withdrawal'?{type:'withdrawal',amount}:{type:'result',amount},cursor=new Date(rangeStart+'T12:00:00'),last=new Date(rangeEnd+'T12:00:00');
  while(cursor<=last){actuals[iso(cursor)]=entry;cursor.setDate(cursor.getDate()+1)}
  localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));
