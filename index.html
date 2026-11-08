@@ -157,11 +157,6 @@ body{background:#eef1f5;color:#171b22}
 .cal-day.past.selected{background:#dceafe;border-color:#3979c9}
 
 
-.calendar-day-editor{margin:14px 0 8px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#f5f7fa}
-.calendar-edit-title{font-size:13px;color:var(--muted);font-weight:650;margin-bottom:9px}
-.calendar-edit-row{display:flex;gap:9px;align-items:center}
-.calendar-edit-row input{min-width:0;flex:1;border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px;font-size:16px;color:var(--ink)}
-.calendar-edit-row button{border:0;border-radius:12px;background:var(--sage-dark);color:#fff;padding:12px 15px;font-weight:650}
 </style>
 </head>
 <body>
@@ -182,11 +177,11 @@ body{background:#eef1f5;color:#171b22}
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="calendar-grid" id="calendarGrid"></div>
- <div class="calendar-day-editor"><div class="calendar-edit-title">Финансовый результат · <span id="calendarSelectedDate"></span></div><div class="calendar-edit-row"><input type="number" step="0.01" inputmode="decimal" id="calendarPnlInput" placeholder="Например, 45 или −12" aria-label="Финансовый результат выбранного дня"><button type="button" id="calendarPnlSave">Сохранить</button></div></div>
+
  <div class="calendar-legend"><span><i class="legend-dot done-dot"></i>Торговал</span><span><i class="legend-dot profit-dot"></i>Плюс</span><span><i class="legend-dot loss-dot"></i>Минус</span></div>
- <div class="range-editor"><b>Плановый финансовый ориентир на период</b><p>Это только плановая сумма для сравнения с результатом. Цель занятия выполняется отметкой «Трейдинг», независимо от прибыли или убытка.</p>
+ <div class="range-editor"><b>Финансовый результат за период</b><p>Укажи диапазон дат и сумму заработка за каждый день. Чтобы изменить один день, выбери одинаковые даты «С» и «По».</p>
  <div class="range-fields"><label>С даты<input class="plan-input" id="goalFrom" type="date"></label><label>По дату<input class="plan-input" id="goalTo" type="date"></label></div>
- <div class="plan-row"><label class="grow">Плановая сумма в день, $<input class="plan-input" id="goalAmount" type="number" step="0.01" placeholder="30"></label><button type="button" class="plan-save" id="saveGoalRange">Применить</button></div></div>
+ <div class="plan-row"><label class="grow">Результат за день, $<input class="plan-input" id="goalAmount" type="number" step="0.01" placeholder="Например, 45 или −12"></label><button type="button" class="plan-save" id="saveGoalRange">Сохранить</button></div></div>
 
 </div>
 </section>
@@ -321,20 +316,17 @@ function renderCalendar(){
   out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+money(value)+'</small>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
- const selectedLabel=new Date(selectedDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
- $('calendarSelectedDate').textContent=selectedLabel;
- $('calendarPnlInput').value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';
+
 }
-$('calendarPnlSave').addEventListener('click',()=>{const raw=$('calendarPnlInput').value.trim();if(raw==='' ){delete actuals[selectedDate]}else if(!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}else{actuals[selectedDate]=Number(raw)}localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Результат за выбранный день сохранён')});
 $('calendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-date]');if(!b)return;selectedDate=b.dataset.date;const input=$('tradeResultInput');if(input)input.value=Object.prototype.hasOwnProperty.call(actuals,selectedDate)?actuals[selectedDate]:'';renderCalendar()});
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('saveGoalRange').addEventListener('click',()=>{
- const from=$('goalFrom').value,to=$('goalTo').value,amount=$('goalAmount').value.trim();
- if(!from||!to||from>to||amount===''||!Number.isFinite(Number(amount))||Number(amount)<0){toast('Проверь даты и дневную цель');return}
- const cursor=new Date(from+'T12:00:00'),last=new Date(to+'T12:00:00');
- while(cursor<=last){plans[iso(cursor)]=String(Number(amount));cursor.setDate(cursor.getDate()+1)}
- localStorage.setItem(PLAN_KEY,JSON.stringify(plans));renderCalendar();toast('Цель сохранена на выбранный период')
+ const from=$('goalFrom').value,to=$('goalTo').value,raw=$('goalAmount').value.trim();
+ if(!from||!to||from>to||raw===''||!Number.isFinite(Number(raw))){toast('Проверь даты и сумму результата');return}
+ const amount=Number(raw),cursor=new Date(from+'T12:00:00'),last=new Date(to+'T12:00:00');
+ while(cursor<=last){actuals[iso(cursor)]=amount;cursor.setDate(cursor.getDate()+1)}
+ localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Результат сохранён за выбранный период')
 });
 
 renderCalendar();
