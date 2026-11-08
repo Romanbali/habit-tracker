@@ -102,7 +102,11 @@ h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
 <div class="ring-wrap"><svg class="ring" viewBox="0 0 150 150" aria-hidden="true"><circle class="track" cx="75" cy="75" r="65"/><circle class="value" id="ringValue" cx="75" cy="75" r="65"/></svg><div class="ring-center"><div class="percent" id="percent">0%</div><div class="ring-sub">выполнено</div></div></div>
 <div class="progress-caption" id="progressCaption">0 из 3 привычек выполнено</div>
 </div>
-<div class="balance"><div><div class="balance-label">Баланс цели</div><div class="balance-value" id="balanceValue">$185</div><div class="balance-note" id="balanceNote">Стартовый баланс + выполненные дни</div></div><div class="balance-icon">↗</div></div>
+<div class="balance"><div><div class="balance-label">Баланс цели</div><div class="balance-value" id="balanceValue">$185</div><div class="balance-note" id="balanceNote">Стартовый баланс + выполненные дни</div></div><div class="balance-icon">↗</div></div></div>
+<button id="openCalendar" type="button" style="width:100%;display:flex;align-items:center;justify-content:space-between;text-align:left;background:var(--sage-pale);color:var(--sage-dark);border:1px solid var(--line);border-radius:18px;padding:17px 19px;margin:0 0 22px;font:inherit;cursor:pointer">
+ <span><strong style="display:block;font-size:15px">Календарь планирования дохода</strong><small style="display:block;margin-top:4px;color:var(--muted)">Выбери дату и запиши план в долларах</small></span><span style="font-size:25px">›</span>
+</button>
+
 <div class="section-head"><h2>Твои привычки</h2><span class="section-hint" id="targetHint">Цели на сегодня</span></div>
 <div class="habits" id="habitList"></div>
 <p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
@@ -222,6 +226,11 @@ document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',
  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b===btn));
  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===btn.dataset.tab));
 }));
+$('openCalendar').addEventListener('click',()=>{
+ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab==='calendar'));
+ document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='calendar'));
+ window.scrollTo(0,0);
+});
 $('exportData').addEventListener('click',()=>{
  const blob=new Blob([JSON.stringify(store,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download='nordic-habit-backup.json';a.click();URL.revokeObjectURL(url);toast('Резервная копия готова');
