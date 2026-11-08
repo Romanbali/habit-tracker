@@ -173,6 +173,11 @@ body{background:#eef1f5;color:#171b22}
 .calendar-range-fields button{border:0;border-radius:11px;background:var(--sage-dark);color:#fff;padding:12px 15px;font-weight:650}
 .cal-day.range-picked{background:#e5effd;border-color:#9bbce8}
 .cal-day.range-edge{outline:2px solid #3979c9;outline-offset:-2px}
+
+.calendar-timezone-label{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;color:var(--muted);font-size:12px}
+.calendar-timezone-label select{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:#fff;color:var(--ink);font-size:14px}
+.cal-day.future{color:#aeb6c1!important}
+.cal-day.future small{color:#aeb6c1!important}
 </style>
 </head>
 <body>
@@ -193,6 +198,9 @@ body{background:#eef1f5;color:#171b22}
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="calendar-range-editor" id="calendarRangeEditor" hidden>
+  <label class="calendar-timezone-label">Часовой пояс
+   <select id="calendarTimezone" aria-label="Часовой пояс календаря"></select>
+  </label>
   <div class="calendar-range-caption" id="calendarRangeCaption">Выбери первый день периода</div>
   <div class="calendar-range-fields"><label>Результат за каждый день, $<input id="calendarRangeAmount" type="number" step="0.01" inputmode="decimal" placeholder="Например, 45 или −12"></label><button type="button" id="calendarRangeSave">Сохранить</button></div>
  </div>
@@ -238,6 +246,12 @@ const $=id=>document.getElementById(id);
 const today=new Date();
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const dateKey=iso(today);
+const TZ_KEY='nordic-calendar-timezone-v1';
+const deviceTimeZone=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+const timezoneOptions=[deviceTimeZone,'UTC','Asia/Jakarta','Asia/Bangkok','Asia/Dubai','Europe/Moscow','Europe/London','Europe/Berlin','America/New_York','America/Los_Angeles'].filter((v,i,a)=>a.indexOf(v)===i);
+let calendarTimeZone=localStorage.getItem(TZ_KEY)||deviceTimeZone;
+const dateInZone=(date,zone)=>{const p=new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);const get=t=>p.find(x=>x.type===t).value;return get('year')+'-'+get('month')+'-'+get('day')};
+
 const dateLabel=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',weekday:'short'}).format(today);
 $('todayDate').textContent=dateLabel;
 let store={days:{}};
@@ -329,16 +343,22 @@ function renderCalendar(){
  let out=names.map(n=>'<div class="cal-weekday">'+n+'</div>').join('');
  for(let i=0;i<offset;i++)out+='<div class="cal-day empty"></div>';
  for(let day=1;day<=days;day++){
-  const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),todayKey=iso(new Date()),past=key<todayKey;
+  const key=prefix+String(day).padStart(2,'0'),has=Object.prototype.hasOwnProperty.call(actuals,key),value=Number(actuals[key]),todayKey=dateInZone(new Date(),calendarTimeZone),past=key<todayKey,future=key>todayKey;
   const rangeLow=rangeStart&&rangeEnd?(rangeStart<rangeEnd?rangeStart:rangeEnd):rangeStart,rangeHigh=rangeStart&&rangeEnd?(rangeStart>rangeEnd?rangeStart:rangeEnd):rangeStart;
   const inRange=calendarEditMode&&rangeLow&&key>=rangeLow&&key<=rangeHigh;
-  const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(inRange?'range-picked ':'')+(key===rangeStart||key===rangeEnd?'range-edge ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
+  const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(future?'future ':'')+(inRange?'range-picked ':'')+(key===rangeStart||key===rangeEnd?'range-edge ':'')+(has&&value<0?'negative':has&&value>0?'positive':'');
   out+='<button type="button" class="'+cls+'" data-date="'+key+'"><span>'+day+'</span>'+(has?'<small>'+money(value)+'</small>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
 
 }
 let calendarEditMode=false,rangeStart=null,rangeEnd=null;
+const timezoneSelect=$('calendarTimezone');
+timezoneOptions.forEach(zone=>{const o=document.createElement('option');o.value=zone;o.textContent=zone+(zone===deviceTimeZone?' · текущее':'');timezoneSelect.appendChild(o)});
+if(!timezoneOptions.includes(calendarTimeZone)){const o=document.createElement('option');o.value=calendarTimeZone;o.textContent=calendarTimeZone;timezoneSelect.appendChild(o)}
+timezoneSelect.value=calendarTimeZone;
+timezoneSelect.addEventListener('change',()=>{calendarTimeZone=timezoneSelect.value;localStorage.setItem(TZ_KEY,calendarTimeZone);renderCalendar()});
+
 $('calendarEditToggle').addEventListener('click',()=>{
  calendarEditMode=!calendarEditMode;rangeStart=null;rangeEnd=null;
  $('calendarEditToggle').setAttribute('aria-pressed',String(calendarEditMode));
