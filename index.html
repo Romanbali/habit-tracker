@@ -109,27 +109,42 @@ h2{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:700}
 .plan-summary{display:flex;justify-content:space-between;gap:12px;margin-top:13px;font-size:12px;color:var(--muted)}
 .plan-summary b{font-size:14px;color:var(--ink)}
 .plan-save{border:0;border-radius:12px;padding:12px 15px;background:var(--sage-dark);color:white;font-weight:650}
-/* Cool white + graphite + blue palette */
-:root{--bg:#f0f1f5;--paper:#fff;--cream:#f4f5f8;--ink:#17191f;--muted:#777d89;--sage:#3b82d6;--sage-dark:#1769c2;--sage-pale:#e8f1fc;--line:#e1e4ea;--shadow:0 5px 18px rgba(25,35,55,.055)}
-body{background:var(--bg);color:var(--ink)}
-.progress-card{background:#fff;border-color:#e5e8ee}
-.ring .track{stroke:#e7eaf0}
-.progress-caption{color:#626a78}
-.habit{background:#fff;border-color:var(--line);box-shadow:0 3px 12px rgba(25,35,55,.04)}
-.habit.done{background:#edf4fd;border-color:#d9e8fa}
-.habit-icon{background:#f0f2f6;color:#596273}
-.habit.done .habit-icon{background:#dceafa;color:var(--sage-dark)}
-.amount{border-color:#e1e5ec;background:#f7f8fa}
-.trade-result input{background:#fff;border-color:#dfe4ec}
-.check{background:#d9dde5}
-.bottom-nav{background:rgba(255,255,255,.96);border-top-color:var(--line)}
-.nav-btn{color:#818794}
-.range-editor,.plan-editor{background:#f4f5f8}
-.plan-input{background:#fff;border-color:#dfe4ec}
-.month-arrow{background:#f5f6f8}
-.week-day.today{background:#e8f1fc;border-color:#cfe1f8}
-.calendar-card,.stat-card,.balance{background:#fff;border-color:var(--line)}
-.trade-result button,.plan-save{background:var(--sage-dark)}
+/* Cool neutral palette: white, ice grey and restrained blue */
+:root{color-scheme:light;--bg:#eef1f5;--paper:#fff;--cream:#f4f6f9;--ink:#171b22;--muted:#737d8b;--sage:#5795d6;--sage-dark:#347fc7;--sage-pale:#e5effa;--line:#dfe5ec;--shadow:0 8px 22px rgba(30,48,70,.055)}
+body{background:#eef1f5;color:#171b22}
+.brand{color:#202630}
+.avatar{background:#e5effa;color:#347fc7}
+.progress-card{background:linear-gradient(145deg,#f7f9fc,#edf2f8);border-color:#e4eaf1;box-shadow:0 8px 22px rgba(30,48,70,.05)}
+.ring .track{stroke:#dce4ed}
+.progress-caption{color:#657181}
+.balance{background:#fff;border-color:#dfe5ec}
+.balance-note{color:#647f9b}
+.balance-icon{background:#e8f0f8;color:#547da5}
+.habit{background:#fff;border-color:#e0e6ed;box-shadow:0 4px 14px rgba(30,48,70,.04)}
+.habit.done{background:#edf4fb;border-color:#d7e5f4}
+.habit-icon{background:#f0f3f7;color:#596675}
+.habit.done .habit-icon{background:#dceafa;color:#347fc7}
+.amount{border-color:#dfe5ec;background:#f6f8fa}
+.trade-result input{background:#fff;border-color:#dfe5ec}
+.trade-result button,.plan-save{background:#347fc7}
+.check{background:#d9dfe7}
+.check[aria-pressed=true]{background:#5795d6}
+.bottom-nav{background:rgba(255,255,255,.97);border-top-color:#dfe5ec}
+.nav-btn{color:#7d8794}
+.nav-btn.active{color:#347fc7}
+.week-day{background:#fff;border-color:#dfe5ec}
+.week-day.today{background:#e5effa;border-color:#c9def2}
+.stat-card,.calendar-card{background:#fff;border-color:#dfe5ec}
+.range-editor,.plan-editor{background:#f1f4f8}
+.plan-input{background:#fff;border-color:#dfe5ec}
+.month-arrow{background:#f5f7fa;border-color:#dfe5ec}
+.cal-day{background:#f2f5f8}
+.cal-day.selected{background:#e5effa;border-color:#5795d6}
+.cal-day.positive{background:#e5f2ec;color:#286548}
+.cal-day.negative{background:#f9e9e8;color:#a84343}
+.cal-day.traded{outline-color:#5795d6}
+.done-dot{background:#5795d6}
+.legend-dot{border-radius:50%}
 </style>
 </head>
 <body>
