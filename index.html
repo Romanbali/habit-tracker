@@ -338,6 +338,13 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 <script>
 (()=>{
 const KEY='nordic-habit-v1';
+const safeSetItem=(key,value)=>{
+ const previous=localStorage.getItem(key);
+ if(previous!==null){
+  try{JSON.parse(previous);localStorage.setItem(key+'-backup-v1',previous)}catch(e){}
+ }
+ localStorage.setItem(key,value);
+};
 const $=id=>document.getElementById(id);
 const today=new Date();
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -359,7 +366,7 @@ const targets=d=>{
 };
 const blank=()=>({trade:'',pushups:'',meditation:'',tradeDone:false,pushDone:false,medDone:false});
 const getDay=d=>({...blank(),...(store.days[d]||{})});
-const save=()=>localStorage.setItem(KEY,JSON.stringify(store));
+const save=()=>safeSetItem(KEY,JSON.stringify(store));
 const target=targets(dateKey);
 const icons={
  trade:'<svg viewBox="0 0 24 24"><path d="M3 17 9 11l4 4 8-9"/><path d="M15 6h6v6"/></svg>',
@@ -390,7 +397,7 @@ function renderWeek(){
  const start=new Date(today);const wd=(start.getDay()+6)%7;start.setDate(start.getDate()-wd);
  $('weekStrip').innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const key=iso(d);return '<div class="week-day '+(key===dateKey?'today':'')+'">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]+'<b>'+d.getDate()+'</b></div>'}).join('');
 }
-$('habitList').addEventListener('click',e=>{if(e.target.id!=='saveTradeResult')return;const input=$('tradeResultInput'),raw=input.value.trim();if(raw!==''&&!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}else{const old=actuals[selectedDate],withdrawal=entryWithdrawal(old),deposit=entryDeposit(old);if(raw===''){if(withdrawal===null&&deposit===null)delete actuals[selectedDate];else actuals[selectedDate]={result:null,withdrawal,deposit}}else{actuals[selectedDate]={result:Number(raw),withdrawal,deposit}}}localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Финансовый результат сохранён')});
+$('habitList').addEventListener('click',e=>{if(e.target.id!=='saveTradeResult')return;const input=$('tradeResultInput'),raw=input.value.trim();if(raw!==''&&!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}else{const old=actuals[selectedDate],withdrawal=entryWithdrawal(old),deposit=entryDeposit(old);if(raw===''){if(withdrawal===null&&deposit===null)delete actuals[selectedDate];else actuals[selectedDate]={result:null,withdrawal,deposit}}else{actuals[selectedDate]={result:Number(raw),withdrawal,deposit}}}safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Финансовый результат сохранён')});
 $('habitList').addEventListener('change',e=>{
  const id=e.target.dataset.input;if(!id)return;
  const d=getDay(dateKey);d[id]=e.target.value;
@@ -437,7 +444,7 @@ const entryAmount=v=>Number(v&&typeof v==='object'?v.amount:v);
 const entryResult=v=>{if(v==null)return null;if(typeof v!=='object')return Number(v);if(v.type==='withdrawal')return null;if(Object.prototype.hasOwnProperty.call(v,'result'))return v.result==null?null:Number(v.result);return v.type==='result'?entryAmount(v):null};
 const entryWithdrawal=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'withdrawal'))return v.withdrawal==null?null:Number(v.withdrawal);return v.type==='withdrawal'?entryAmount(v):null};
 const entryDeposit=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'deposit'))return v.deposit==null?null:Number(v.deposit);return null};
-if(!accountState||!Number.isFinite(Number(accountState.value))){accountState={value:196,snapshot:transactionTotal()};localStorage.setItem(ACCOUNT_KEY,JSON.stringify(accountState));}
+if(!accountState||!Number.isFinite(Number(accountState.value))){accountState={value:196,snapshot:transactionTotal()};safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));}
 function accountBalance(){return Number(accountState.value)+transactionTotal()-Number(accountState.snapshot||0)}
 function renderFinance(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
@@ -515,7 +522,7 @@ $('calendarRangeSave').addEventListener('click',()=>{
   else actuals[key]=next;
   cursor.setDate(cursor.getDate()+1);
  }
- localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));
+ safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));
  $('calendarRangeEditor').hidden=true;rangeStart=null;rangeEnd=null;calendarEditMode=false;
  $('calendarEditToggle').setAttribute('aria-pressed','false');
  $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
@@ -526,7 +533,7 @@ $('calendarRangeSave').addEventListener('click',()=>{
  renderCalendar();toast('Изменения сохранены');
 });
 $('accountEditToggle').addEventListener('click',()=>{$('accountEditPanel').hidden=!$('accountEditPanel').hidden;if(!$('accountEditPanel').hidden)$('accountBalanceInput').focus()});
-$('saveAccountBalance').addEventListener('click',()=>{const raw=$('accountBalanceInput').value.trim();if(raw===''||!Number.isFinite(Number(raw))){toast('Укажи баланс аккаунта');return}accountState={value:Number(raw),snapshot:transactionTotal()};localStorage.setItem(ACCOUNT_KEY,JSON.stringify(accountState));$('accountBalanceInput').value='';$('accountEditPanel').hidden=true;renderFinance();toast('Баланс аккаунта обновлён')});
+$('saveAccountBalance').addEventListener('click',()=>{const raw=$('accountBalanceInput').value.trim();if(raw===''||!Number.isFinite(Number(raw))){toast('Укажи баланс аккаунта');return}accountState={value:Number(raw),snapshot:transactionTotal()};safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));$('accountBalanceInput').value='';$('accountEditPanel').hidden=true;renderFinance();toast('Баланс аккаунта обновлён')});
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
 
