@@ -432,23 +432,23 @@ let calendarEditMode=false,rangeStart=null,rangeEnd=null;
 $('calendarEditToggle').addEventListener('click',()=>{
  calendarEditMode=!calendarEditMode;rangeStart=null;rangeEnd=null;
  $('calendarEditToggle').setAttribute('aria-pressed',String(calendarEditMode));
- $('calendarEditToggle').setAttribute('aria-label',calendarEditMode?'Выбери начало периода':'Режим редактирования календаря');
+ $('calendarEditToggle').setAttribute('aria-label',calendarEditMode?'Выбери день календаря':'Режим редактирования календаря');
+ $('accountEditToggle').hidden=!calendarEditMode;
+ $('accountEditPanel').hidden=true;
  $('calendarGrid').classList.toggle('calendar-edit-mode',calendarEditMode);
  $('calendarRangeEditor').hidden=true;
- if(calendarEditMode)toast('Выбери первый день периода');
+ if(calendarEditMode)toast('Выбери дату для редактирования');
  renderCalendar();
 });
 $('calendarGrid').addEventListener('click',e=>{
  const day=e.target.closest('[data-date]');if(!day)return;
  selectedDate=day.dataset.date;
  if(calendarEditMode){
-  if(!rangeStart||rangeEnd){rangeStart=selectedDate;rangeEnd=null;$('calendarRangeEditor').hidden=true;$('calendarRangeCaption').textContent='Начало: '+new Date(rangeStart+'T12:00:00').toLocaleDateString('ru-RU')+' · выбери конец периода';}
-  else{rangeEnd=selectedDate;if(rangeEnd<rangeStart){const swap=rangeStart;rangeStart=rangeEnd;rangeEnd=swap;}
-   const fmt=x=>new Date(x+'T12:00:00').toLocaleDateString('ru-RU');
-   $('calendarRangeCaption').textContent=rangeStart===rangeEnd?'Результат за '+fmt(rangeStart):'Период: '+fmt(rangeStart)+' — '+fmt(rangeEnd);
-   const existing=actuals[rangeStart];$('calendarResultAmount').value=entryResult(existing)??'';$('calendarWithdrawalAmount').value=entryWithdrawal(existing)??'';$('calendarDepositAmount').value=entryDeposit(existing)??'';
-   $('calendarRangeEditor').hidden=false;
-  }
+  rangeStart=selectedDate;rangeEnd=selectedDate;
+  const fmt=x=>new Date(x+'T12:00:00').toLocaleDateString('ru-RU');
+  $('calendarRangeCaption').textContent='Запись за '+fmt(rangeStart);
+  const existing=actuals[rangeStart];$('calendarResultAmount').value=entryResult(existing)??'';$('calendarWithdrawalAmount').value=entryWithdrawal(existing)??'';$('calendarDepositAmount').value=entryDeposit(existing)??'';
+  $('calendarRangeEditor').hidden=false;
  }else{renderCalendar();return;}
  renderCalendar();
 });
