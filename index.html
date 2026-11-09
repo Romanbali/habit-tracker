@@ -234,6 +234,17 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 
 .account-card-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:26px}.account-card-heading .finance-label{margin:0}.account-card-heading .account-edit-toggle{margin:0;flex:none;width:27px;height:27px}.account-balance .finance-value{margin-top:7px}.account-balance .account-edit-panel{margin-top:10px}
 .cal-day .withdrawal-label{display:inline-block;align-self:flex-start;margin:0 0 2px;padding:2px 5px;border-radius:6px;background:#fff3cf;color:#9a6900!important;font-size:9px!important;font-weight:750!important;line-height:1.2}.cal-day.future .withdrawal-label{background:#fff6df;color:#a98743!important}
+
+/* Final visual overrides: align account balance and make withdrawals clearly amber */
+.finance-card.account-balance{display:flex;flex-direction:column;min-height:130px}
+.account-card-heading{width:100%;min-height:28px;display:flex;align-items:center;justify-content:space-between}
+.account-card-heading .finance-label{margin:0}
+.account-card-heading .account-edit-toggle{margin:0}
+.finance-card.account-balance>.finance-value{margin-top:auto;margin-bottom:auto;font-size:25px;line-height:1.15}
+.finance-card.account-balance .account-edit-panel{width:100%;margin-top:8px}
+.cal-day .withdrawal-label{display:inline-flex!important;align-items:center;align-self:flex-start;padding:3px 6px!important;margin:0 0 3px!important;border-radius:7px!important;background:#fff0bd!important;color:#956300!important;font-size:9px!important;font-weight:800!important;line-height:1.2!important}
+.cal-day.future .withdrawal-label{background:#fff6dc!important;color:#ad8a45!important}
+
 </style>
 </head>
 <body>
