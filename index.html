@@ -483,10 +483,19 @@ $('calendarGrid').addEventListener('click',e=>{
  const day=e.target.closest('[data-date]');if(!day)return;
  selectedDate=day.dataset.date;
  if(calendarEditMode){
-  rangeStart=selectedDate;rangeEnd=selectedDate;
   const fmt=x=>new Date(x+'T12:00:00').toLocaleDateString('ru-RU');
-  $('calendarRangeCaption').textContent='Запись за '+fmt(rangeStart);
-  const existing=actuals[rangeStart];$('calendarResultAmount').value=entryResult(existing)??'';$('calendarWithdrawalAmount').value=entryWithdrawal(existing)??'';$('calendarDepositAmount').value=entryDeposit(existing)??'';
+  if(!rangeStart||rangeEnd){
+   rangeStart=selectedDate;rangeEnd=null;
+   const existing=actuals[rangeStart];
+   $('calendarResultAmount').value=entryResult(existing)??'';
+   $('calendarWithdrawalAmount').value=entryWithdrawal(existing)??'';
+   $('calendarDepositAmount').value=entryDeposit(existing)??'';
+   $('calendarRangeCaption').textContent='Начало: '+fmt(rangeStart)+' · выбери конечную дату или сохрани один день';
+  }else{
+   rangeEnd=selectedDate;
+   if(rangeEnd<rangeStart){const swap=rangeStart;rangeStart=rangeEnd;rangeEnd=swap;}
+   $('calendarRangeCaption').textContent=rangeStart===rangeEnd?'Один день: '+fmt(rangeStart):'Период: '+fmt(rangeStart)+' — '+fmt(rangeEnd);
+  }
   $('calendarRangeEditor').hidden=false;
  }else{renderCalendar();return;}
  renderCalendar();
