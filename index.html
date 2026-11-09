@@ -213,6 +213,17 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .calendar-edit-toggle[aria-pressed="true"]{background:linear-gradient(145deg,#dceafe,#c9defa);border-color:#3979c9;color:#174f91;box-shadow:0 4px 13px rgba(57,121,201,.2)}
 .calendar-card{margin-top:0}
 .toast{bottom:calc(18px + env(safe-area-inset-bottom))}
+
+/* Monthly trading goal and editable account balance */
+.finance-summary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 14px}
+.finance-card{min-width:0;padding:13px 12px;border:1px solid #e4e9ef;border-radius:15px;background:#fff;box-shadow:0 3px 12px rgba(35,55,80,.045)}
+.finance-label{font-size:11px;color:#778292;font-weight:650;margin-bottom:7px}
+.finance-value{font-size:22px;font-weight:800;letter-spacing:-.04em;color:#26364a;white-space:nowrap}
+.finance-sub{font-size:10px;color:#778292;margin-top:5px;white-space:nowrap}
+.finance-progress{height:4px;border-radius:8px;background:#edf0f4;margin-top:9px;overflow:hidden}.finance-progress i{display:block;height:100%;width:0;background:#76a98b;border-radius:8px}
+.account-edit-row{display:flex;gap:5px;margin-top:8px}.account-edit-row input{width:0;min-width:0;flex:1;border:1px solid #e4e9ef;border-radius:8px;padding:6px;font-size:11px}.account-edit-row button{border:0;border-radius:8px;background:#eaf1fb;color:#315f9b;padding:0 8px;font-size:10px;font-weight:700}
+.plan-field .money-field-icon{background:#eaf1fb;color:#315f9b}
+@media(max-width:360px){.finance-summary{gap:6px}.finance-card{padding:11px 9px}.finance-value{font-size:19px}.finance-sub{font-size:9px}}
 </style>
 </head>
 <body>
@@ -232,11 +243,16 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 <div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-label="Режим редактирования календаря" title="Редактировать любой день" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.8 6.2 3 3M4 20l5.2-1.2"/></svg></button></div>
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
+ <div class="finance-summary">
+  <div class="finance-card monthly-goal"><div class="finance-label">Цель на месяц</div><div class="finance-value" id="monthlyGoalValue">$0</div><div class="finance-sub" id="monthlyEarned">Заработано $0 из $0</div><div class="finance-progress"><i id="monthlyProgress"></i></div></div>
+  <div class="finance-card account-balance"><div class="finance-label">Баланс на аккаунте</div><div class="finance-value" id="accountBalanceValue">$196</div><div class="account-edit-row"><input id="accountBalanceInput" type="number" step="0.01" inputmode="decimal" placeholder="0" aria-label="Новый баланс аккаунта"><button type="button" id="saveAccountBalance">Изменить</button></div></div>
+ </div>
  <div class="calendar-range-editor" id="calendarRangeEditor" hidden>
   <div class="calendar-range-caption" id="calendarRangeCaption">Выбери первый день периода</div>
   <div id="calendarEditBalance" class="calendar-edit-balance"></div>
   <div class="calendar-money-fields">
    <label class="money-field"><span class="money-field-icon">↗</span><span class="money-field-copy"><b>Результат торговли</b><small>Прибыль или убыток за день</small></span><input id="calendarResultAmount" type="number" step="0.01" inputmode="decimal" placeholder="0"></label>
+   <label class="money-field plan-field"><span class="money-field-icon">◎</span><span class="money-field-copy"><b>Цель на день</b><small>Добавить к месячной цели</small></span><input id="calendarPlanAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></label>
    <div class="money-field withdrawal-field"><span class="money-field-icon">⇧</span><span class="money-field-copy"><b>Вывод средств</b><small>Укажи сумму вывода</small></span><input id="calendarWithdrawalAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>
    <div class="money-field deposit-field"><span class="money-field-icon">＋</span><span class="money-field-copy"><b>Пополнение</b><small>Добавить деньги на счёт</small></span><input id="calendarDepositAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>
   </div>
@@ -365,28 +381,45 @@ $('resetData').addEventListener('click',()=>{
  if(confirm('Удалить все отметки и вернуть баланс к $185?')){store={days:{}};save();render();toast('Данные сброшены')}
 });
 
-const PLAN_KEY='nordic-trading-plan-v1',ACTUAL_KEY='nordic-trading-actual-v1';
+const PLAN_KEY='nordic-trading-plan-v1',ACTUAL_KEY='nordic-trading-actual-v1',ACCOUNT_KEY='nordic-account-balance-v1';
 let plans={},actuals={};
 try{plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{}}catch(e){}
 try{actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{}}catch(e){}
+let accountState=null;
+const transactionTotal=()=>Object.values(actuals).reduce((sum,v)=>sum+(entryResult(v)||0)+(entryDeposit(v)||0)-(entryWithdrawal(v)||0),0);
+try{accountState=JSON.parse(localStorage.getItem(ACCOUNT_KEY))}catch(e){}
+if(!accountState||!Number.isFinite(Number(accountState.value))){accountState={value:196,snapshot:transactionTotal()};localStorage.setItem(ACCOUNT_KEY,JSON.stringify(accountState));}
 let viewMonth=new Date(today.getFullYear(),today.getMonth(),1),selectedDate=dateKey;
 const money=n=>{const v=Number(n||0);return(v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:2})};
 const entryAmount=v=>Number(v&&typeof v==='object'?v.amount:v);
 const entryResult=v=>{if(v==null)return null;if(typeof v!=='object')return Number(v);if(v.type==='withdrawal')return null;if(Object.prototype.hasOwnProperty.call(v,'result'))return v.result==null?null:Number(v.result);return v.type==='result'?entryAmount(v):null};
 const entryWithdrawal=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'withdrawal'))return v.withdrawal==null?null:Number(v.withdrawal);return v.type==='withdrawal'?entryAmount(v):null};
 const entryDeposit=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'deposit'))return v.deposit==null?null:Number(v.deposit);return null};
+const entryPlan=v=>v&&typeof v==='object'&&v.plan!=null?Number(v.plan):null;
+function accountBalance(){return Number(accountState.value)+transactionTotal()-Number(accountState.snapshot||0)}
+function renderFinance(){
+ const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
+ const monthEntries=Object.keys(actuals).filter(k=>k.startsWith(prefix)).map(k=>actuals[k]);
+ const goal=monthEntries.reduce((s,v)=>s+(entryPlan(v)||0),0);
+ const earned=monthEntries.reduce((s,v)=>s+(entryResult(v)||0),0);
+ $('monthlyGoalValue').textContent=money(goal);
+ $('monthlyEarned').textContent='Заработано '+money(earned)+' из '+money(goal);
+ $('monthlyProgress').style.width=(goal>0?Math.max(0,Math.min(100,earned/goal*100)):0)+'%';
+ $('accountBalanceValue').textContent=money(accountBalance());
+}
 function renderCalendar(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
  $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
+ renderFinance();
  const first=new Date(y,m,1),offset=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),names=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
  let out=names.map(n=>'<div class="cal-weekday">'+n+'</div>').join('');
  for(let i=0;i<offset;i++)out+='<div class="cal-day empty"></div>';
  for(let day=1;day<=days;day++){
-  const key=prefix+String(day).padStart(2,'0'),entry=actuals[key],result=entryResult(entry),withdrawalAmount=entryWithdrawal(entry),depositAmount=entryDeposit(entry),hasResult=result!==null&&Number.isFinite(result),hasWithdrawal=withdrawalAmount!==null&&Number.isFinite(withdrawalAmount),hasDeposit=depositAmount!==null&&Number.isFinite(depositAmount),has=hasResult||hasWithdrawal||hasDeposit,todayKey=iso(new Date()),past=key<todayKey,future=key>todayKey;
+  const key=prefix+String(day).padStart(2,'0'),entry=actuals[key],result=entryResult(entry),withdrawalAmount=entryWithdrawal(entry),depositAmount=entryDeposit(entry),planAmount=entryPlan(entry),hasResult=result!==null&&Number.isFinite(result),hasWithdrawal=withdrawalAmount!==null&&Number.isFinite(withdrawalAmount),hasDeposit=depositAmount!==null&&Number.isFinite(depositAmount),has=hasResult||hasWithdrawal||hasDeposit,todayKey=iso(new Date()),past=key<todayKey,future=key>todayKey;
   const rangeLow=rangeStart&&rangeEnd?(rangeStart<rangeEnd?rangeStart:rangeEnd):rangeStart,rangeHigh=rangeStart&&rangeEnd?(rangeStart>rangeEnd?rangeStart:rangeEnd):rangeStart;
   const inRange=calendarEditMode&&rangeLow&&key>=rangeLow&&key<=rangeHigh;
   const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(future?'future ':'')+(inRange?'range-picked ':'')+(key===rangeStart||key===rangeEnd?'range-edge ':'')+(hasResult&&result<0?'negative ':hasResult&&result>0?'positive ':'');
-  out+='<button type="button" class="'+cls+'" data-date="'+key+'">'+(hasWithdrawal?'<small class="withdrawal-label">⇧ '+money(withdrawalAmount)+'</small>':'')+'<span class="day-number">'+day+'</span>'+(hasResult?'<small>'+money(result)+'</small>':'')+(hasDeposit?'<small class="deposit-label">＋ '+money(depositAmount)+'</small>':'')+'</button>';
+  out+='<button type="button" class="'+cls+'" data-date="'+key+'">'+(hasWithdrawal?'<small class="withdrawal-label">⇧ '+money(withdrawalAmount)+'</small>':'')+'<span class="day-number">'+day+'</span>'+(hasResult?'<small>'+money(result)+'</small>':'')+(hasDeposit?'<small class="deposit-label">＋ '+money(depositAmount)+'</small>':'')+(planAmount!==null?'<small class="plan-label">◎ '+money(planAmount)+'</small>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
 
@@ -410,7 +443,7 @@ $('calendarGrid').addEventListener('click',e=>{
   else{rangeEnd=selectedDate;if(rangeEnd<rangeStart){const swap=rangeStart;rangeStart=rangeEnd;rangeEnd=swap;}
    const fmt=x=>new Date(x+'T12:00:00').toLocaleDateString('ru-RU');
    $('calendarRangeCaption').textContent=rangeStart===rangeEnd?'Результат за '+fmt(rangeStart):'Период: '+fmt(rangeStart)+' — '+fmt(rangeEnd);
-   const existing=actuals[rangeStart];$('calendarResultAmount').value=entryResult(existing)??'';$('calendarWithdrawalAmount').value=entryWithdrawal(existing)??'';$('calendarDepositAmount').value=entryDeposit(existing)??'';$('calendarEditBalance').textContent='Баланс цели: $'+balance().toLocaleString('en-US');
+   const existing=actuals[rangeStart];$('calendarResultAmount').value=entryResult(existing)??'';$('calendarWithdrawalAmount').value=entryWithdrawal(existing)??'';$('calendarDepositAmount').value=entryDeposit(existing)??'';$('calendarPlanAmount').value=entryPlan(existing)??'';$('calendarEditBalance').textContent='Баланс цели: $'+balance().toLocaleString('en-US');
    $('calendarRangeEditor').hidden=false;
   }
  }else{renderCalendar();return;}
@@ -419,15 +452,16 @@ $('calendarGrid').addEventListener('click',e=>{
 $('calendarRangeSave').addEventListener('click',()=>{
  if(!rangeStart){toast('Выбери дату в календаре');return}
  if(!rangeEnd)rangeEnd=rangeStart;
- const resultRaw=$('calendarResultAmount').value.trim(),withdrawalRaw=$('calendarWithdrawalAmount').value.trim(),depositRaw=$('calendarDepositAmount').value.trim();
+ const resultRaw=$('calendarResultAmount').value.trim(),withdrawalRaw=$('calendarWithdrawalAmount').value.trim(),depositRaw=$('calendarDepositAmount').value.trim(),planRaw=$('calendarPlanAmount').value.trim();
  if(resultRaw!==''&&!Number.isFinite(Number(resultRaw))){toast('Проверь результат торговли');return}
  if(withdrawalRaw!==''&&(!Number.isFinite(Number(withdrawalRaw))||Number(withdrawalRaw)<0)){toast('Проверь сумму вывода');return}
  if(depositRaw!==''&&(!Number.isFinite(Number(depositRaw))||Number(depositRaw)<0)){toast('Проверь сумму пополнения');return}
+ if(planRaw!==''&&(!Number.isFinite(Number(planRaw))||Number(planRaw)<0)){toast('Проверь дневную цель');return}
  const cursor=new Date(rangeStart+'T12:00:00'),last=new Date(rangeEnd+'T12:00:00');
  while(cursor<=last){
   const key=iso(cursor);
-  const next={result:resultRaw===''?null:Number(resultRaw),withdrawal:withdrawalRaw===''?null:Number(withdrawalRaw),deposit:depositRaw===''?null:Number(depositRaw)};
-  if(next.result===null&&next.withdrawal===null&&next.deposit===null)delete actuals[key];
+  const next={result:resultRaw===''?null:Number(resultRaw),withdrawal:withdrawalRaw===''?null:Number(withdrawalRaw),deposit:depositRaw===''?null:Number(depositRaw),plan:planRaw===''?null:Number(planRaw)};
+  if(next.result===null&&next.withdrawal===null&&next.deposit===null&&next.plan===null)delete actuals[key];
   else actuals[key]=next;
   cursor.setDate(cursor.getDate()+1);
  }
@@ -438,6 +472,7 @@ $('calendarRangeSave').addEventListener('click',()=>{
  $('calendarGrid').classList.remove('calendar-edit-mode');
  renderCalendar();toast('Изменения сохранены');
 });
+$('saveAccountBalance').addEventListener('click',()=>{const raw=$('accountBalanceInput').value.trim();if(raw===''||!Number.isFinite(Number(raw))){toast('Укажи баланс аккаунта');return}accountState={value:Number(raw),snapshot:transactionTotal()};localStorage.setItem(ACCOUNT_KEY,JSON.stringify(accountState));$('accountBalanceInput').value='';renderFinance();toast('Баланс аккаунта обновлён')});
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
 
