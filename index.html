@@ -198,6 +198,21 @@ body{background:#eef1f5;color:#171b22}
 
 .cal-day.future{color:#aeb6c1!important}
 .cal-day.future small{color:#aeb6c1!important}
+
+/* Calendar-only layout */
+body{padding-bottom:env(safe-area-inset-bottom)}
+.app{padding-top:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+.app>.top,.bottom-nav{display:none!important}
+#home>.date-row,#home>.progress-card,#home>.balance,#home>.section-head:not(.calendar-section-head),#home>.habits,#home>.hint{display:none!important}
+#home{display:block!important}
+.calendar-section-head{margin:0 0 14px;padding:2px 2px}
+.calendar-section-head h2{font-size:22px;letter-spacing:-.035em}
+.calendar-edit-toggle{width:46px;height:46px;border:1px solid #cbd8e7;border-radius:15px;background:linear-gradient(145deg,#fff,#edf4fc);color:#3979c9;box-shadow:0 4px 12px rgba(43,91,150,.12);transition:transform .16s,box-shadow .16s}
+.calendar-edit-toggle:active{transform:scale(.94)}
+.calendar-edit-toggle svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.calendar-edit-toggle[aria-pressed="true"]{background:linear-gradient(145deg,#dceafe,#c9defa);border-color:#3979c9;color:#174f91;box-shadow:0 4px 13px rgba(57,121,201,.2)}
+.calendar-card{margin-top:0}
+.toast{bottom:calc(18px + env(safe-area-inset-bottom))}
 </style>
 </head>
 <body>
@@ -214,7 +229,7 @@ body{background:#eef1f5;color:#171b22}
 <div class="section-head"><h2>Твои привычки</h2><span class="section-hint" id="targetHint">Цели на сегодня</span></div>
 <div class="habits" id="habitList"></div>
 <p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
-<div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-label="Режим редактирования календаря" title="Редактировать любой день" aria-pressed="false">✎</button></div>
+<div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-label="Режим редактирования календаря" title="Редактировать любой день" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.8 6.2 3 3M4 20l5.2-1.2"/></svg></button></div>
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="calendar-range-editor" id="calendarRangeEditor" hidden>
