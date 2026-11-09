@@ -245,6 +245,19 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .cal-day .withdrawal-label{display:inline-flex!important;align-items:center;align-self:flex-start;padding:3px 6px!important;margin:0 0 3px!important;border-radius:7px!important;background:#fff0bd!important;color:#956300!important;font-size:9px!important;font-weight:800!important;line-height:1.2!important}
 .cal-day.future .withdrawal-label{background:#fff6dc!important;color:#ad8a45!important}
 
+
+/* UX refinement: balanced finance cards and readable transaction markers */
+.finance-card.account-balance{display:block;min-height:130px;padding:15px 14px}
+.account-card-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:25px}
+.account-card-heading .finance-label{margin:0;font-size:11px;letter-spacing:.01em}
+.account-card-heading .account-edit-toggle{margin:0;flex:none;width:28px;height:28px}
+.finance-card.account-balance>.finance-value{margin:12px 0 0!important;font-size:27px;line-height:1.15;letter-spacing:-.045em}
+.finance-card.account-balance .account-edit-panel{width:100%;margin-top:12px}
+.cal-day{position:relative;min-height:72px;padding:6px 3px;gap:4px}
+.cal-day .withdrawal-label{align-self:center!important;display:inline-flex!important;justify-content:center;align-items:center;max-width:calc(100% - 4px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:3px 6px!important;margin:0 0 1px!important;border-radius:7px!important;background:#fff0bd!important;color:#916000!important;font-size:9px!important;font-weight:800!important;line-height:1.2!important}
+.cal-day.future .withdrawal-label{background:#fff7e1!important;color:#ad914f!important}
+.cal-day .deposit-label{align-self:center;display:inline-flex;justify-content:center;max-width:calc(100% - 4px);white-space:nowrap;padding:2px 5px;border-radius:6px;background:#e8f4ed;color:#347451!important;font-size:8px!important;font-weight:750!important}
+
 </style>
 </head>
 <body>
