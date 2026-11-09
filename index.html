@@ -229,6 +229,8 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .account-edit-toggle{display:grid;width:28px;height:28px;margin-top:7px;border:1px solid #d5e1ef;border-radius:9px;background:#edf4fc;color:#347fc7;place-items:center;cursor:pointer}
 .account-edit-toggle[hidden]{display:none}
 .account-edit-toggle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.account-edit-toggle{display:grid;width:28px;height:28px;margin-top:7px;border:1px solid #d5e1ef;border-radius:9px;background:#edf4fc;color:#347fc7;place-items:center;cursor:pointer}.account-edit-toggle[hidden],.account-edit-panel[hidden]{display:none!important}.account-edit-toggle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.account-edit-panel{display:flex;gap:5px;margin-top:8px}.account-edit-panel input{width:0;min-width:0;flex:1;border:1px solid #e4e9ef;border-radius:8px;padding:6px;font-size:11px}.account-edit-panel button{border:0;border-radius:8px;background:#eaf1fb;color:#315f9b;padding:0 8px;font-size:10px;font-weight:700}
 </style>
 </head>
 <body>
@@ -250,7 +252,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="finance-summary">
   <div class="finance-card monthly-goal"><div class="finance-label">Цель на месяц</div><div class="finance-value" id="monthlyGoalValue">$0</div><div class="finance-sub" id="monthlyEarned">Заработано $0 из $0</div><div class="finance-progress"><i id="monthlyProgress"></i></div></div>
-  <div class="finance-card account-balance"><div class="finance-label">Баланс на аккаунте</div><div class="finance-value" id="accountBalanceValue">$196</div><div class="account-edit-row"><input id="accountBalanceInput" type="number" step="0.01" inputmode="decimal" placeholder="0" aria-label="Новый баланс аккаунта"><button type="button" id="saveAccountBalance">Изменить</button></div></div>
+  <div class="finance-card account-balance"><div class="finance-label">Баланс на аккаунте</div><div class="finance-value" id="accountBalanceValue">$196</div><button type="button" class="account-edit-toggle" id="accountEditToggle" aria-label="Редактировать баланс" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.8 6.2 3 3M4 20l5.2-1.2"/></svg></button><div class="account-edit-panel" id="accountEditPanel" hidden><input id="accountBalanceInput" type="number" step="0.01" inputmode="decimal" placeholder="0" aria-label="Новый баланс аккаунта"><button type="button" id="saveAccountBalance">Сохранить</button></div></div>
  </div>
  <div class="calendar-range-editor" id="calendarRangeEditor" hidden>
   <div class="calendar-range-caption" id="calendarRangeCaption">Выбери первый день периода</div>
@@ -471,12 +473,14 @@ $('calendarRangeSave').addEventListener('click',()=>{
  $('calendarRangeEditor').hidden=true;rangeStart=null;rangeEnd=null;calendarEditMode=false;
  $('calendarEditToggle').setAttribute('aria-pressed','false');
  $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
+ $('accountEditToggle').hidden=true;$('accountEditPanel').hidden=true;
  $('accountEditToggle').hidden=true;
  $('accountEditPanel').hidden=true;
  $('calendarGrid').classList.remove('calendar-edit-mode');
  renderCalendar();toast('Изменения сохранены');
 });
-$('saveAccountBalance').addEventListener('click',()=>{const raw=$('accountBalanceInput').value.trim();if(raw===''||!Number.isFinite(Number(raw))){toast('Укажи баланс аккаунта');return}accountState={value:Number(raw),snapshot:transactionTotal()};localStorage.setItem(ACCOUNT_KEY,JSON.stringify(accountState));$('accountBalanceInput').value='';renderFinance();toast('Баланс аккаунта обновлён')});
+$('accountEditToggle').addEventListener('click',()=>{$('accountEditPanel').hidden=!$('accountEditPanel').hidden;if(!$('accountEditPanel').hidden)$('accountBalanceInput').focus()});
+$('saveAccountBalance').addEventListener('click',()=>{const raw=$('accountBalanceInput').value.trim();if(raw===''||!Number.isFinite(Number(raw))){toast('Укажи баланс аккаунта');return}accountState={value:Number(raw),snapshot:transactionTotal()};localStorage.setItem(ACCOUNT_KEY,JSON.stringify(accountState));$('accountBalanceInput').value='';$('accountEditPanel').hidden=true;renderFinance();toast('Баланс аккаунта обновлён')});
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
 
