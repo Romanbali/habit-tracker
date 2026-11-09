@@ -258,6 +258,16 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .cal-day.future .withdrawal-label{background:#fff7e1!important;color:#ad914f!important}
 .cal-day .deposit-label{align-self:center;display:inline-flex;justify-content:center;max-width:calc(100% - 4px);white-space:nowrap;padding:2px 5px;border-radius:6px;background:#e8f4ed;color:#347451!important;font-size:8px!important;font-weight:750!important}
 
+
+/* Account card follows the same spacing and typography as the monthly goal card */
+.finance-card.account-balance{position:relative;display:block;min-height:0;padding:13px 12px;align-self:stretch}
+.account-card-heading{display:block;position:relative;min-height:0;width:100%;padding:0}
+.account-card-heading .finance-label{display:block;margin:0 0 7px!important;font-size:11px;font-weight:650;line-height:normal;letter-spacing:0}
+.account-card-heading .account-edit-toggle{position:absolute;right:0;top:-2px;margin:0;width:27px;height:27px}
+.finance-card.account-balance>.finance-value{display:block;margin:0!important;padding:0;font-size:22px;line-height:normal;letter-spacing:-.04em;font-weight:800}
+.finance-card.account-balance .account-edit-panel{margin-top:10px;width:100%}
+@media(max-width:360px){.finance-card.account-balance{padding:11px 9px}.finance-card.account-balance>.finance-value{font-size:19px}}
+
 </style>
 </head>
 <body>
