@@ -467,6 +467,8 @@ $('calendarRangeSave').addEventListener('click',()=>{
  $('calendarRangeEditor').hidden=true;rangeStart=null;rangeEnd=null;calendarEditMode=false;
  $('calendarEditToggle').setAttribute('aria-pressed','false');
  $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
+ $('accountEditToggle').hidden=true;
+ $('accountEditPanel').hidden=true;
  $('calendarGrid').classList.remove('calendar-edit-mode');
  renderCalendar();toast('Изменения сохранены');
 });
