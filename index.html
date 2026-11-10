@@ -470,9 +470,14 @@ if(!accountState||!Number.isFinite(Number(accountState.value))){accountState={va
 function accountBalance(){return Number(accountState.value)+transactionTotal()-Number(accountState.snapshot||0)}
 function renderFinance(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
- const monthEntries=Object.keys(actuals).filter(k=>k.startsWith(prefix)).map(k=>actuals[k]);
- const goal=monthEntries.reduce((s,v)=>s+(entryResult(v)||0),0);
- const earned=Object.keys(actuals).filter(k=>k.startsWith(prefix)&&k<=iso(new Date())).reduce((s,k)=>s+(entryResult(actuals[k])||0),0);
+ const monthKeys=Object.keys(actuals).filter(k=>k.startsWith(prefix));
+ const monthEntries=monthKeys.map(k=>actuals[k]);
+ // Цель месяца включает торговый результат и уже запланированные выводы.
+ // Заработано — фактический результат активных (наступивших) дней плюс выведенные деньги:
+ // вывод не отменяет факт заработка, а только уменьшает доступный баланс аккаунта.
+ const goal=monthEntries.reduce((s,v)=>s+(entryResult(v)||0)+(entryWithdrawal(v)||0),0);
+ const todayKey=iso(new Date());
+ const earned=monthKeys.filter(k=>k<=todayKey).reduce((s,k)=>s+(entryResult(actuals[k])||0)+(entryWithdrawal(actuals[k])||0),0);
  $('monthlyGoalValue').textContent=money(goal);
  $('monthlyEarned').textContent='Заработано '+money(earned)+' из '+money(goal);
  $('monthlyProgress').style.width=(goal>0?Math.max(0,Math.min(100,earned/goal*100)):0)+'%';
