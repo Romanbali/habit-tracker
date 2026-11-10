@@ -440,6 +440,7 @@ $('resetData').addEventListener('click',()=>{
 });
 
 const PLAN_KEY='nordic-trading-plan-v1',ACTUAL_KEY='nordic-trading-actual-v1',ACCOUNT_KEY='nordic-account-balance-v1';
+const screenshotSeedKey='nordic-screenshot-data-2026-v1';
 let plans={},actuals={};
 try{plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{}}catch(e){}
 try{actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{}}catch(e){}
@@ -476,7 +477,6 @@ const entryDeposit=v=>{if(!v||typeof v!=='object')return null;if(Object.prototyp
 
 // Однократное заполнение октября и ноября 2026 по данным со скриншотов.
 // Сначала сохраняем прежние записи в резервную копию; остальные месяцы не трогаем.
-const screenshotSeedKey='nordic-screenshot-data-2026-v1';
 if(!localStorage.getItem(screenshotSeedKey)){
  try{
   const oldActuals=localStorage.getItem(ACTUAL_KEY);
