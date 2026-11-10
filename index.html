@@ -466,6 +466,23 @@ const entryAmount=v=>Number(v&&typeof v==='object'?v.amount:v);
 const entryResult=v=>{if(v==null)return null;if(typeof v!=='object')return Number(v);if(v.type==='withdrawal')return null;if(Object.prototype.hasOwnProperty.call(v,'result'))return v.result==null?null:Number(v.result);return v.type==='result'?entryAmount(v):null};
 const entryWithdrawal=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'withdrawal'))return v.withdrawal==null?null:Number(v.withdrawal);return v.type==='withdrawal'?entryAmount(v):null};
 const entryDeposit=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'deposit'))return v.deposit==null?null:Number(v.deposit);return null};
+
+// Однократное заполнение октября и ноября 2026 по данным со скриншотов.
+// Сначала сохраняем прежние записи в резервную копию; остальные месяцы не трогаем.
+const screenshotSeedKey='nordic-screenshot-data-2026-v1';
+if(!localStorage.getItem(screenshotSeedKey)){
+ try{
+  const oldActuals=localStorage.getItem(ACTUAL_KEY);
+  if(oldActuals!==null)localStorage.setItem(ACTUAL_KEY+'-before-screenshot-seed-v1',oldActuals);
+  const seed={};
+  for(let d=13;d<=31;d++)seed['2026-10-'+String(d).padStart(2,'0')]={result:10,withdrawal:null,deposit:null};
+  const nov=[15,15,15,15,-105,30,30,30,30,-93,30,30,30,30,30,30,30,30,30,30,30,30,20,20,20,20,20,20,20,20];
+  nov.forEach((v,i)=>{const day=String(i+1).padStart(2,'0');seed['2026-11-'+day]={result:v,withdrawal:i===2?65:i===4?80:null,deposit:null};});
+  Object.assign(actuals,seed);
+  localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));
+  localStorage.setItem(screenshotSeedKey,'done');
+ }catch(e){console.warn('Не удалось применить данные со скриншотов',e)}
+}
 if(!accountState||!Number.isFinite(Number(accountState.value))){accountState={value:196,snapshot:transactionTotal()};safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));}
 function accountBalance(){return Number(accountState.value)+transactionTotal()-Number(accountState.snapshot||0)}
 function renderFinance(){
