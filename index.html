@@ -459,6 +459,13 @@ store=restoreIfRicher(KEY,store,'привычек');
 let accountState=null;
 const transactionTotal=()=>Object.values(actuals).reduce((sum,v)=>sum+(entryResult(v)||0)+(entryDeposit(v)||0)-(entryWithdrawal(v)||0),0);
 try{accountState=JSON.parse(localStorage.getItem(ACCOUNT_KEY))}catch(e){}
+if(localStorage.getItem(screenshotSeedKey)==='done'&&!localStorage.getItem(screenshotSeedKey+'-balance')){
+ // Сохраняем показанный на скриншотах баланс $358 как стартовую точку,
+ // чтобы добавление восстановленных дней не изменило его задним числом.
+ accountState={value:358,snapshot:transactionTotal()};
+ localStorage.setItem(ACCOUNT_KEY,JSON.stringify(accountState));
+ localStorage.setItem(screenshotSeedKey+'-balance','done');
+}
 
 let viewMonth=new Date(today.getFullYear(),today.getMonth(),1),selectedDate=dateKey;
 const money=n=>{const v=Number(n||0);return(v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:2})};
