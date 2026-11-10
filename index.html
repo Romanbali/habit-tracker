@@ -438,8 +438,8 @@ const restoreIfRicher=(key,current,label)=>{
  try{
   const backup=JSON.parse(localStorage.getItem(key+'-backup-v1'));
   if(!backup||typeof backup!=='object')return current;
-  const currentCount=Object.keys(current||{}).length,backupCount=Object.keys(backup).length;
-  if(backupCount>currentCount&&confirm('Найдена резервная копия '+label+' ('+backupCount+' записей вместо '+currentCount+'). Восстановить предыдущие данные?')){
+  const currentCount=Object.keys(current||{}).length,backupCount=Object.keys(backup).length,currentSize=JSON.stringify(current||{}).length,backupSize=JSON.stringify(backup).length;
+  if((backupCount>currentCount||backupSize>currentSize+8)&&confirm('Найдена более полная предыдущая резервная копия '+label+' ('+backupCount+' записей; сейчас '+currentCount+'). Восстановить её?')){
    localStorage.setItem(key,JSON.stringify(backup));return backup;
   }
  }catch(e){}
