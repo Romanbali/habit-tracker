@@ -572,6 +572,18 @@ $('saveAccountBalance').addEventListener('click',()=>{const raw=$('accountBalanc
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
 
+// Синхронизация открытых вкладок одного и того же сайта.
+// Оба адреса (с ?v=... и без параметров) используют единое хранилище origin.
+window.addEventListener('storage',e=>{
+ if(![KEY,PLAN_KEY,ACTUAL_KEY,ACCOUNT_KEY].includes(e.key))return;
+ try{
+  if(e.key===KEY){const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.days)store=v;}
+  if(e.key===PLAN_KEY)plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{};
+  if(e.key===ACTUAL_KEY)actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{};
+  if(e.key===ACCOUNT_KEY)accountState=JSON.parse(localStorage.getItem(ACCOUNT_KEY));
+  renderCalendar();render();
+ }catch(err){console.warn('Не удалось синхронизировать вкладки',err)}
+});
 
 renderCalendar();
 render();
