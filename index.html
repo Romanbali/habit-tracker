@@ -434,6 +434,19 @@ const PLAN_KEY='nordic-trading-plan-v1',ACTUAL_KEY='nordic-trading-actual-v1',AC
 let plans={},actuals={};
 try{plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{}}catch(e){}
 try{actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{}}catch(e){}
+const restoreIfRicher=(key,current,label)=>{
+ try{
+  const backup=JSON.parse(localStorage.getItem(key+'-backup-v1'));
+  if(!backup||typeof backup!=='object')return current;
+  const currentCount=Object.keys(current||{}).length,backupCount=Object.keys(backup).length;
+  if(backupCount>currentCount&&confirm('Найдена резервная копия '+label+' ('+backupCount+' записей вместо '+currentCount+'). Восстановить предыдущие данные?')){
+   localStorage.setItem(key,JSON.stringify(backup));return backup;
+  }
+ }catch(e){}
+ return current;
+};
+actuals=restoreIfRicher(ACTUAL_KEY,actuals,'календаря');
+store=restoreIfRicher(KEY,store,'привычек');
 let accountState=null;
 const transactionTotal=()=>Object.values(actuals).reduce((sum,v)=>sum+(entryResult(v)||0)+(entryDeposit(v)||0)-(entryWithdrawal(v)||0),0);
 try{accountState=JSON.parse(localStorage.getItem(ACCOUNT_KEY))}catch(e){}
@@ -517,7 +530,12 @@ $('calendarRangeSave').addEventListener('click',()=>{
  const cursor=new Date(rangeStart+'T12:00:00'),last=new Date(rangeEnd+'T12:00:00');
  while(cursor<=last){
   const key=iso(cursor);
-  const next={result:resultRaw===''?null:Number(resultRaw),withdrawal:withdrawalRaw===''?null:Number(withdrawalRaw),deposit:depositRaw===''?null:Number(depositRaw)};
+  const previous=actuals[key],isRange=rangeStart!==rangeEnd;
+  const next={
+   result:resultRaw===''?(isRange?entryResult(previous):null):Number(resultRaw),
+   withdrawal:withdrawalRaw===''?(isRange?entryWithdrawal(previous):null):Number(withdrawalRaw),
+   deposit:depositRaw===''?(isRange?entryDeposit(previous):null):Number(depositRaw)
+  };
   if(next.result===null&&next.withdrawal===null&&next.deposit===null)delete actuals[key];
   else actuals[key]=next;
   cursor.setDate(cursor.getDate()+1);
