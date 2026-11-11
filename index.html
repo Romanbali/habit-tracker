@@ -192,6 +192,7 @@ body{background:#eef1f5;color:#171b22}
 .calendar-session-actions button{display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:max-content!important;min-height:42px;align-items:center;justify-content:center;cursor:pointer;white-space:nowrap;box-shadow:none!important}
 #calendarSessionSave{padding:0 20px!important;min-width:128px!important;min-height:42px!important;border:1px solid #456b82!important;border-radius:999px!important;background:#456b82!important;color:#fff!important;font-size:14px!important;line-height:1!important;font-weight:650!important;letter-spacing:.1px}
 #calendarSessionCancel{width:42px!important;height:42px!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;color:#53616b!important;font-size:28px!important;line-height:1!important;font-weight:400!important}
+#calendarBackupDownload{min-height:38px!important;padding:0 13px!important;border:1px solid #d9e1e6!important;border-radius:999px!important;background:#f2f5f7!important;color:#526878!important;font-size:12px!important;font-weight:650!important}
 .calendar-edit-actions .calendar-remove-withdrawal{background:#eeedfb;color:#625f9e}
 .calendar-edit-balance{font-size:11px;color:var(--muted);margin:-3px 0 10px}
 .cal-day.withdrawal{background:#e9eafa!important;color:#4c4d91!important;border-color:#d6d8f2!important}
@@ -298,7 +299,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 <div class="habits" id="habitList"></div>
 <p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
 <div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-label="Режим редактирования календаря" title="Редактировать любой день" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.8 6.2 3 3M4 20l5.2-1.2"/></svg></button></div>
-<div class="calendar-session-actions" id="calendarSessionActions" style="display:none"><button type="button" id="calendarSessionCancel" aria-label="Выйти без сохранения" title="Выйти без сохранения">×</button><button type="button" id="calendarSessionSave">Сохранить</button></div>
+<div class="calendar-session-actions" id="calendarSessionActions" style="display:none"><button type="button" id="calendarSessionCancel" aria-label="Выйти без сохранения" title="Выйти без сохранения">×</button><button type="button" id="calendarBackupDownload" title="Скачать резервную копию">Скачать копию</button><button type="button" id="calendarSessionSave">Сохранить</button></div>
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="finance-summary">
@@ -446,6 +447,20 @@ $('resetData').addEventListener('click',()=>{
 
 const PLAN_KEY='nordic-trading-plan-v1',ACTUAL_KEY='nordic-trading-actual-v1',ACCOUNT_KEY='nordic-account-balance-v1';
 const screenshotSeedKey='nordic-screenshot-data-2026-v1';
+function downloadFullBackup(){
+ const keys=[KEY,PLAN_KEY,ACTUAL_KEY,ACCOUNT_KEY,
+  KEY+'-backup-v1',PLAN_KEY+'-backup-v1',ACTUAL_KEY+'-backup-v1',ACCOUNT_KEY+'-backup-v1',
+  screenshotSeedKey,screenshotSeedKey+'-balance'];
+ const storage={};
+ keys.forEach(key=>{const value=localStorage.getItem(key);if(value!==null)storage[key]=value});
+ const backup={format:'nordic-habit-full-backup',version:1,exportedAt:new Date().toISOString(),storage};
+ const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='nordic-habit-backup-'+new Date().toISOString().slice(0,10)+'.json';
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+ toast('Полная резервная копия скачана');
+}
 let plans={},actuals={};
 try{plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{}}catch(e){}
 try{actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{}}catch(e){}
@@ -567,6 +582,7 @@ function cancelCalendarEdit(){
  finishCalendarEdit();renderCalendar();toast('Изменения отменены');
 }
 $('calendarSessionCancel').addEventListener('click',cancelCalendarEdit);
+$('calendarBackupDownload').addEventListener('click',downloadFullBackup);
 $('calendarSessionSave').addEventListener('click',()=>{
  if(externalChangeDuringEdit){cancelCalendarEdit();toast('Данные обновились в другой вкладке. Черновик отменён — открой редактирование снова.');return}
  safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));
