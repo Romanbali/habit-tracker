@@ -460,20 +460,19 @@ store=restoreIfRicher(KEY,store,'привычек');
 let accountState=null;
 const transactionTotal=()=>Object.values(actuals).reduce((sum,v)=>sum+(entryResult(v)||0)+(entryDeposit(v)||0)-(entryWithdrawal(v)||0),0);
 try{accountState=JSON.parse(localStorage.getItem(ACCOUNT_KEY))}catch(e){}
-if(localStorage.getItem(screenshotSeedKey)==='done'&&!localStorage.getItem(screenshotSeedKey+'-balance')){
- // Сохраняем показанный на скриншотах баланс $358 как стартовую точку,
- // чтобы добавление восстановленных дней не изменило его задним числом.
- accountState={value:358,snapshot:transactionTotal()};
- localStorage.setItem(ACCOUNT_KEY,JSON.stringify(accountState));
- localStorage.setItem(screenshotSeedKey+'-balance','done');
-}
-
 let viewMonth=new Date(today.getFullYear(),today.getMonth(),1),selectedDate=dateKey;
 const money=n=>{const v=Number(n||0);return(v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:2})};
 const entryAmount=v=>Number(v&&typeof v==='object'?v.amount:v);
 const entryResult=v=>{if(v==null)return null;if(typeof v!=='object')return Number(v);if(v.type==='withdrawal')return null;if(Object.prototype.hasOwnProperty.call(v,'result'))return v.result==null?null:Number(v.result);return v.type==='result'?entryAmount(v):null};
 const entryWithdrawal=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'withdrawal'))return v.withdrawal==null?null:Number(v.withdrawal);return v.type==='withdrawal'?entryAmount(v):null};
 const entryDeposit=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'deposit'))return v.deposit==null?null:Number(v.deposit);return null};
+
+// Снимок баланса $358 фиксируем после объявления финансовых функций.
+if(localStorage.getItem(screenshotSeedKey)==='done'&&!localStorage.getItem(screenshotSeedKey+'-balance')){
+ accountState={value:358,snapshot:transactionTotal()};
+ localStorage.setItem(ACCOUNT_KEY,JSON.stringify(accountState));
+ localStorage.setItem(screenshotSeedKey+'-balance','done');
+}
 
 // Однократное заполнение октября и ноября 2026 по данным со скриншотов.
 // Сначала сохраняем прежние записи в резервную копию; остальные месяцы не трогаем.
