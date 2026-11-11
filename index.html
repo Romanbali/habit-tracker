@@ -489,7 +489,10 @@ if(!localStorage.getItem(screenshotSeedKey)){
   for(let d=13;d<=31;d++)seed['2026-10-'+String(d).padStart(2,'0')]={result:10,withdrawal:null,deposit:null};
   const nov=[15,15,15,15,-105,30,30,30,30,-93,30,30,30,30,30,30,30,30,30,30,30,30,20,20,20,20,20,20,20,20];
   nov.forEach((v,i)=>{const day=String(i+1).padStart(2,'0');seed['2026-11-'+day]={result:v,withdrawal:i===2?65:i===4?80:null,deposit:null};});
-  Object.assign(actuals,seed);
+  // Заполняем только отсутствующие даты: уже внесённые пользователем записи важнее шаблона.
+  for(const [key,value] of Object.entries(seed)){
+   if(!Object.prototype.hasOwnProperty.call(actuals,key))actuals[key]=value;
+  }
   localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));
   localStorage.setItem(screenshotSeedKey,'done');
  }catch(e){console.warn('Не удалось применить данные со скриншотов',e)}
@@ -531,12 +534,12 @@ function renderCalendar(){
  $('calendarGrid').innerHTML=out;
 
 }
-let calendarEditMode=false,rangeStart=null,rangeEnd=null,originalActuals=null,originalAccountState=null;
+let calendarEditMode=false,rangeStart=null,rangeEnd=null,originalActuals=null,originalAccountState=null,externalChangeDuringEdit=false;
 const cloneData=v=>v==null?v:JSON.parse(JSON.stringify(v));
 
 $('calendarEditToggle').addEventListener('click',()=>{
  if(calendarEditMode){cancelCalendarEdit();return}
- originalActuals=cloneData(actuals)||{};originalAccountState=cloneData(accountState);
+ originalActuals=cloneData(actuals)||{};originalAccountState=cloneData(accountState);externalChangeDuringEdit=false;
  calendarEditMode=true;rangeStart=null;rangeEnd=null;
  $('calendarSessionActions').style.display='flex';
  $('calendarEditToggle').setAttribute('aria-pressed',String(calendarEditMode));
@@ -558,13 +561,16 @@ function finishCalendarEdit(){
 }
 function cancelCalendarEdit(){
  if(!calendarEditMode)return;
- actuals=originalActuals||{};accountState=originalAccountState;
+ // Отмена откатывает только черновик и перечитывает последнюю сохранённую версию.
+ try{actuals=JSON.parse(localStorage.getItem(ACTUAL_KEY))||{};}catch(e){actuals=originalActuals||{}}
+ try{accountState=JSON.parse(localStorage.getItem(ACCOUNT_KEY))||originalAccountState;}catch(e){accountState=originalAccountState}
  finishCalendarEdit();renderCalendar();toast('Изменения отменены');
 }
 $('calendarSessionCancel').addEventListener('click',cancelCalendarEdit);
 $('calendarSessionSave').addEventListener('click',()=>{
+ if(externalChangeDuringEdit){cancelCalendarEdit();toast('Данные обновились в другой вкладке. Черновик отменён — открой редактирование снова.');return}
  safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));
- if(accountState!==originalAccountState)safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));
+ if(JSON.stringify(accountState)!==JSON.stringify(originalAccountState))safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));
  finishCalendarEdit();renderCalendar();toast('Все изменения сохранены');
 });
 $('calendarGrid').addEventListener('click',e=>{
@@ -620,6 +626,7 @@ $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFul
 // Оба адреса (с ?v=... и без параметров) используют единое хранилище origin.
 window.addEventListener('storage',e=>{
  if(![KEY,PLAN_KEY,ACTUAL_KEY,ACCOUNT_KEY].includes(e.key))return;
+ if(calendarEditMode){externalChangeDuringEdit=true;toast('Данные изменились в другой вкладке. Отмени черновик перед продолжением.');return}
  try{
   if(e.key===KEY){const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.days)store=v;}
   if(e.key===PLAN_KEY)plans=JSON.parse(localStorage.getItem(PLAN_KEY))||{};
