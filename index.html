@@ -188,6 +188,10 @@ body{background:#eef1f5;color:#171b22}
 .calendar-edit-actions{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
 .calendar-edit-actions button{border:0;border-radius:11px;padding:11px 13px;font-size:12px;font-weight:700;cursor:pointer}
 .calendar-edit-actions #calendarRangeSave{flex:1;background:var(--sage-dark);color:white}
+.calendar-session-actions{display:flex;gap:9px;margin:0 0 12px}
+.calendar-session-actions button{flex:1;border:0;border-radius:12px;padding:13px 12px;font-size:13px;font-weight:750;cursor:pointer}
+#calendarSessionSave{background:var(--sage-dark);color:white}
+#calendarSessionCancel{background:#f1e9e7;color:#8c5148}
 .calendar-edit-actions .calendar-remove-withdrawal{background:#eeedfb;color:#625f9e}
 .calendar-edit-balance{font-size:11px;color:var(--muted);margin:-3px 0 10px}
 .cal-day.withdrawal{background:#e9eafa!important;color:#4c4d91!important;border-color:#d6d8f2!important}
@@ -294,6 +298,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 <div class="habits" id="habitList"></div>
 <p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
 <div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-label="Режим редактирования календаря" title="Редактировать любой день" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.8 6.2 3 3M4 20l5.2-1.2"/></svg></button></div>
+<div class="calendar-session-actions" id="calendarSessionActions" hidden><button type="button" id="calendarSessionSave">Сохранить</button><button type="button" id="calendarSessionCancel">Выйти без сохранения</button></div>
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="finance-summary">
@@ -526,10 +531,14 @@ function renderCalendar(){
  $('calendarGrid').innerHTML=out;
 
 }
-let calendarEditMode=false,rangeStart=null,rangeEnd=null;
+let calendarEditMode=false,rangeStart=null,rangeEnd=null,originalActuals=null,originalAccountState=null;
+const cloneData=v=>v==null?v:JSON.parse(JSON.stringify(v));
 
 $('calendarEditToggle').addEventListener('click',()=>{
- calendarEditMode=!calendarEditMode;rangeStart=null;rangeEnd=null;
+ if(calendarEditMode){cancelCalendarEdit();return}
+ originalActuals=cloneData(actuals)||{};originalAccountState=cloneData(accountState);
+ calendarEditMode=true;rangeStart=null;rangeEnd=null;
+ $('calendarSessionActions').hidden=false;
  $('calendarEditToggle').setAttribute('aria-pressed',String(calendarEditMode));
  $('calendarEditToggle').setAttribute('aria-label',calendarEditMode?'Выбери день календаря':'Режим редактирования календаря');
  $('accountEditToggle').hidden=!calendarEditMode;
@@ -538,6 +547,25 @@ $('calendarEditToggle').addEventListener('click',()=>{
  $('calendarRangeEditor').hidden=true;
  if(calendarEditMode)toast('Выбери дату для редактирования');
  renderCalendar();
+});
+function finishCalendarEdit(){
+ calendarEditMode=false;rangeStart=null;rangeEnd=null;originalActuals=null;originalAccountState=null;
+ $('calendarSessionActions').hidden=true;$('calendarRangeEditor').hidden=true;
+ $('calendarEditToggle').setAttribute('aria-pressed','false');
+ $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
+ $('accountEditToggle').hidden=true;$('accountEditPanel').hidden=true;
+ $('calendarGrid').classList.remove('calendar-edit-mode');
+}
+function cancelCalendarEdit(){
+ if(!calendarEditMode)return;
+ actuals=originalActuals||{};accountState=originalAccountState;
+ finishCalendarEdit();renderCalendar();toast('Изменения отменены');
+}
+$('calendarSessionCancel').addEventListener('click',cancelCalendarEdit);
+$('calendarSessionSave').addEventListener('click',()=>{
+ safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));
+ if(accountState!==originalAccountState)safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));
+ finishCalendarEdit();renderCalendar();toast('Все изменения сохранены');
 });
 $('calendarGrid').addEventListener('click',e=>{
  const day=e.target.closest('[data-date]');if(!day)return;
@@ -580,18 +608,11 @@ $('calendarRangeSave').addEventListener('click',()=>{
   else actuals[key]=next;
   cursor.setDate(cursor.getDate()+1);
  }
- safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));
- $('calendarRangeEditor').hidden=true;rangeStart=null;rangeEnd=null;calendarEditMode=false;
- $('calendarEditToggle').setAttribute('aria-pressed','false');
- $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
- $('accountEditToggle').hidden=true;$('accountEditPanel').hidden=true;
- $('accountEditToggle').hidden=true;
- $('accountEditPanel').hidden=true;
- $('calendarGrid').classList.remove('calendar-edit-mode');
- renderCalendar();toast('Изменения сохранены');
+ $('calendarRangeEditor').hidden=true;rangeStart=null;rangeEnd=null;
+ renderCalendar();toast('Изменения применены — нажми «Сохранить» вверху');
 });
 $('accountEditToggle').addEventListener('click',()=>{$('accountEditPanel').hidden=!$('accountEditPanel').hidden;if(!$('accountEditPanel').hidden)$('accountBalanceInput').focus()});
-$('saveAccountBalance').addEventListener('click',()=>{const raw=$('accountBalanceInput').value.trim();if(raw===''||!Number.isFinite(Number(raw))){toast('Укажи баланс аккаунта');return}accountState={value:Number(raw),snapshot:transactionTotal()};safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));$('accountBalanceInput').value='';$('accountEditPanel').hidden=true;renderFinance();toast('Баланс аккаунта обновлён')});
+$('saveAccountBalance').addEventListener('click',()=>{const raw=$('accountBalanceInput').value.trim();if(raw===''||!Number.isFinite(Number(raw))){toast('Укажи баланс аккаунта');return}accountState={value:Number(raw),snapshot:transactionTotal()};$('accountBalanceInput').value='';$('accountEditPanel').hidden=true;renderFinance();toast('Баланс изменён — нажми «Сохранить» вверху')});
 $('prevMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);selectedDate=iso(viewMonth);renderCalendar()});
 $('nextMonth').addEventListener('click',()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);selectedDate=iso(viewMonth);renderCalendar()});
 
