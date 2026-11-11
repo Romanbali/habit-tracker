@@ -478,7 +478,7 @@ const restoreIfRicher=(key,current,label)=>{
 actuals=restoreIfRicher(ACTUAL_KEY,actuals,'календаря');
 store=restoreIfRicher(KEY,store,'привычек');
 let accountState=null;
-const transactionTotal=()=>Object.values(actuals).reduce((sum,v)=>sum+(entryResult(v)||0)+(entryDeposit(v)||0)-(entryWithdrawal(v)||0),0);
+const transactionTotal=()=>{const todayKey=iso(new Date());return Object.entries(actuals).reduce((sum,[date,v])=>date<=todayKey?sum+(entryResult(v)||0)+(entryDeposit(v)||0)-(entryWithdrawal(v)||0):sum,0)};
 try{accountState=JSON.parse(localStorage.getItem(ACCOUNT_KEY))}catch(e){}
 let viewMonth=new Date(today.getFullYear(),today.getMonth(),1),selectedDate=dateKey;
 const money=n=>{const v=Number(n||0);return(v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:2})};
