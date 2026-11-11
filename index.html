@@ -298,7 +298,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 <div class="habits" id="habitList"></div>
 <p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
 <div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-label="Режим редактирования календаря" title="Редактировать любой день" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.8 6.2 3 3M4 20l5.2-1.2"/></svg></button></div>
-<div class="calendar-session-actions" id="calendarSessionActions" hidden><button type="button" id="calendarSessionSave">Сохранить</button><button type="button" id="calendarSessionCancel">Выйти без сохранения</button></div>
+<div class="calendar-session-actions" id="calendarSessionActions" style="display:none"><button type="button" id="calendarSessionSave">Сохранить</button><button type="button" id="calendarSessionCancel">Выйти без сохранения</button></div>
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="finance-summary">
@@ -538,7 +538,7 @@ $('calendarEditToggle').addEventListener('click',()=>{
  if(calendarEditMode){cancelCalendarEdit();return}
  originalActuals=cloneData(actuals)||{};originalAccountState=cloneData(accountState);
  calendarEditMode=true;rangeStart=null;rangeEnd=null;
- $('calendarSessionActions').hidden=false;
+ $('calendarSessionActions').style.display='flex';
  $('calendarEditToggle').setAttribute('aria-pressed',String(calendarEditMode));
  $('calendarEditToggle').setAttribute('aria-label',calendarEditMode?'Выбери день календаря':'Режим редактирования календаря');
  $('accountEditToggle').hidden=!calendarEditMode;
@@ -550,7 +550,7 @@ $('calendarEditToggle').addEventListener('click',()=>{
 });
 function finishCalendarEdit(){
  calendarEditMode=false;rangeStart=null;rangeEnd=null;originalActuals=null;originalAccountState=null;
- $('calendarSessionActions').hidden=true;$('calendarRangeEditor').hidden=true;
+ $('calendarSessionActions').style.display='none';$('calendarRangeEditor').hidden=true;
  $('calendarEditToggle').setAttribute('aria-pressed','false');
  $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
  $('accountEditToggle').hidden=true;$('accountEditPanel').hidden=true;
