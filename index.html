@@ -188,10 +188,10 @@ body{background:#eef1f5;color:#171b22}
 .calendar-edit-actions{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
 .calendar-edit-actions button{border:0;border-radius:11px;padding:11px 13px;font-size:12px;font-weight:700;cursor:pointer}
 .calendar-edit-actions #calendarRangeSave{flex:1;background:var(--sage-dark);color:white}
-.calendar-session-actions{display:flex!important;justify-content:space-between!important;align-items:center;gap:14px;margin:0 0 14px}
-.calendar-session-actions button{display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:max-content!important;min-height:56px;align-items:center;justify-content:center;cursor:pointer;white-space:nowrap;box-shadow:none!important}
-#calendarSessionSave{padding:0 30px!important;min-width:176px!important;border:1px solid var(--sage-dark)!important;border-radius:999px!important;background:var(--sage-dark)!important;color:#fff!important;font-size:17px!important;line-height:1.1!important;font-weight:700!important}
-#calendarSessionCancel{width:56px!important;height:56px!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;color:#626b65!important;font-size:32px!important;line-height:1!important;font-weight:400!important}
+.calendar-session-actions{display:flex!important;justify-content:space-between!important;align-items:center;gap:10px;margin:0 0 12px}
+.calendar-session-actions button{display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:max-content!important;min-height:42px;align-items:center;justify-content:center;cursor:pointer;white-space:nowrap;box-shadow:none!important}
+#calendarSessionSave{padding:0 20px!important;min-width:128px!important;min-height:42px!important;border:1px solid #456b82!important;border-radius:999px!important;background:#456b82!important;color:#fff!important;font-size:14px!important;line-height:1!important;font-weight:650!important;letter-spacing:.1px}
+#calendarSessionCancel{width:42px!important;height:42px!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;color:#53616b!important;font-size:28px!important;line-height:1!important;font-weight:400!important}
 .calendar-edit-actions .calendar-remove-withdrawal{background:#eeedfb;color:#625f9e}
 .calendar-edit-balance{font-size:11px;color:var(--muted);margin:-3px 0 10px}
 .cal-day.withdrawal{background:#e9eafa!important;color:#4c4d91!important;border-color:#d6d8f2!important}
@@ -298,7 +298,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 <div class="habits" id="habitList"></div>
 <p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
 <div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-label="Режим редактирования календаря" title="Редактировать любой день" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.8 6.2 3 3M4 20l5.2-1.2"/></svg></button></div>
-<div class="calendar-session-actions" id="calendarSessionActions" style="display:none"><button type="button" id="calendarSessionSave">Сохранить</button><button type="button" id="calendarSessionCancel" aria-label="Выйти без сохранения" title="Выйти без сохранения">×</button></div>
+<div class="calendar-session-actions" id="calendarSessionActions" style="display:none"><button type="button" id="calendarSessionCancel" aria-label="Выйти без сохранения" title="Выйти без сохранения">×</button><button type="button" id="calendarSessionSave">Сохранить</button></div>
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="finance-summary">
