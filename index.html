@@ -519,11 +519,10 @@ function renderFinance(){
  const monthKeys=Object.keys(actuals).filter(k=>k.startsWith(prefix));
  const monthEntries=monthKeys.map(k=>actuals[k]);
  const todayKey=iso(new Date());
- // Цель месяца — сумма дневных плановых целей за каждый день месяца,
- // включая будущие даты, даже если результат за них ещё не внесён.
+ // Цель месяца — сумма торговых результатов, внесённых на любые даты месяца,
+ // включая будущие. Будущие дни без внесённого результата ничего не добавляют.
  // Выводы и пополнения не меняют торговую цель.
- const daysInMonth=new Date(y,m+1,0).getDate();
- const goal=Array.from({length:daysInMonth},(_,i)=>targets(prefix+String(i+1).padStart(2,'0'))).reduce((s,v)=>s+v,0);
+ const goal=monthEntries.reduce((s,v)=>s+(entryResult(v)||0),0);
  // Заработано — полный фактический торговый результат всех наступивших дней месяца.
  // Дни учитываются целиком, даже если дневная цель уже была достигнута.
  const earned=monthKeys.filter(k=>k<=todayKey).reduce((s,k)=>s+(entryResult(actuals[k])||0),0);
