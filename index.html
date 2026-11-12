@@ -299,6 +299,10 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .account-withdrawals i{display:grid;place-items:center;width:19px;height:19px;border-radius:6px;background:#ffefc2;color:#a9780a;font-size:12px;font-style:normal;font-weight:800}
 .account-withdrawals b{font-size:12px;font-weight:800;color:#9b6c08;white-space:nowrap}
 
+
+/* Ошибки: «Да» — красный, «Нет» — зелёный; рынок остаётся с обратной логикой. */
+.day-review-options button[data-review="hadErrors"][data-value="true"].active-yes{background:#f9e8e7;border-color:#dfa19d;color:#a84343}
+.day-review-options button[data-review="hadErrors"][data-value="false"].active-no{background:#e3f2e8;border-color:#8cbea0;color:#286548}
 </style>
 </head>
 <body>
