@@ -264,7 +264,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .cal-day .review-dots{display:flex;gap:4px;align-items:center;justify-content:center;min-height:6px}
 .cal-day .review-dot{width:6px;height:6px;border-radius:50%;display:block;flex:none}
 .cal-day .trade-time-badge{position:absolute;z-index:4;right:-5px;top:-7px;padding:3px 5px;border-radius:8px;background:#347fc7;color:#fff!important;font-size:8px!important;line-height:1.15;font-weight:800;box-shadow:0 2px 5px #1e355533;white-space:nowrap;transform:rotate(2deg)}
-.day-review{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:14px;background:#f8fafc}
+.day-review[hidden]{display:none!important}.day-review{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:14px;background:#f8fafc}
 .day-review-title{font-size:13px;font-weight:750;margin-bottom:8px}.day-review-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.day-review-head .day-review-title{margin:0}.day-review-reset{border:1px solid #e2a5a1;border-radius:8px;background:#fff0ef;color:#a84343;padding:5px 8px;font-size:10px;font-weight:700}.day-review-reset[hidden]{display:none!important}
 .day-review-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #e8edf2;font-size:12px;color:var(--ink)}
 .day-review-options{display:flex;gap:5px;flex:none}
@@ -582,9 +582,11 @@ function renderDayReview(){
   const todayEntry=actuals[dateKey]||{};
   const todayReviewComplete=typeof todayEntry.goodMarket==='boolean'&&typeof todayEntry.hadErrors==='boolean'&&!!todayEntry.tradeTime;
   const reviewHasData=typeof entry.goodMarket==='boolean'||typeof entry.hadErrors==='boolean'||!!entry.tradeTime;
+  const reviewComplete=typeof entry.goodMarket==='boolean'&&typeof entry.hadErrors==='boolean'&&!!entry.tradeTime;
+  $('dayReview').hidden=!calendarEditMode;
   $('calendarEditToggle').classList.toggle('has-review-notice',!todayReviewComplete);
   $('dayReviewReset').hidden=!calendarEditMode||!reviewHasData||isFutureReview;
- $('calendarEditToggle').title=reviewComplete?'Отметки за день заполнены — можно отредактировать':'Заполни дневной обзор';
+  $('calendarEditToggle').title=reviewComplete?'Отметки за день заполнены — можно отредактировать':'Заполни дневной обзор';
  $('dayReviewTitle').textContent='Отметки за '+new Date(reviewDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
  $('tradeTime').value=entry.tradeTime||'';
  $('tradeTime').disabled=!calendarEditMode||isFutureReview;
@@ -616,7 +618,7 @@ $('calendarEditToggle').addEventListener('click',()=>{
  renderCalendar();
 });
 function finishCalendarEdit(){
- calendarEditMode=false;rangeStart=null;rangeEnd=null;originalActuals=null;originalAccountState=null;
+  calendarEditMode=false;$('dayReview').hidden=true;rangeStart=null;rangeEnd=null;originalActuals=null;originalAccountState=null;
  $('calendarSessionActions').style.display='none';$('calendarRangeEditor').hidden=true;
  $('calendarEditToggle').setAttribute('aria-pressed','false');
  $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
@@ -634,8 +636,14 @@ $('calendarSessionCancel').addEventListener('click',cancelCalendarEdit);
 $('calendarBackupDownload').addEventListener('click',downloadFullBackup);
 $('calendarSessionSave').addEventListener('click',()=>{
  if(externalChangeDuringEdit){cancelCalendarEdit();toast('Данные обновились в другой вкладке. Черновик отменён — открой редактирование снова.');return}
- safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));
- if(JSON.stringify(accountState)!==JSON.stringify(originalAccountState))safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));
+ // Clear every review entry while preserving all financial fields.
+  for(const [key,value] of Object.entries(actuals)){
+   if(!value||typeof value!=='object')continue;
+   delete value.goodMarket;delete value.hadErrors;delete value.tradeTime;
+   if(!Object.keys(value).length)delete actuals[key];
+  }
+  safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));
+  if(JSON.stringify(accountState)!==JSON.stringify(originalAccountState))safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));
  finishCalendarEdit();renderCalendar();toast('Все изменения сохранены');
 });
 $('dayReviewReset').addEventListener('click',()=>{
