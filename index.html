@@ -208,12 +208,23 @@ body{background:#eef1f5;color:#171b22}
 .cal-day.future small{color:#aeb6c1!important}
 .cal-day.future.positive,.cal-day.future.negative{background:#f5f7fa!important;border-color:#e5e9ef!important;color:#aeb6c1!important}
 
-/* Calendar-only layout */
-body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
-.app{padding-top:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
-.app>.top{display:none!important}.bottom-nav{display:grid!important;position:fixed!important;z-index:50!important;bottom:0!important;left:50%!important;transform:translateX(-50%)!important;width:min(520px,100%)!important;}
+/* Working sheet and section cards */
+body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+.app{padding-top:20px;padding-bottom:calc(28px + env(safe-area-inset-bottom))}
+.dashboard-head{margin:12px 2px 22px}
+.dashboard-head .eyebrow{margin-bottom:8px}
+.dashboard-head h1{font-size:30px}
+.dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.dashboard-card{appearance:none;width:100%;min-width:0;aspect-ratio:1/1;border:1px solid #e1e6ed;border-radius:20px;background:linear-gradient(145deg,#fff 0%,#f3f6fa 100%);padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;text-align:left;color:var(--ink);box-shadow:0 6px 18px rgba(38,55,76,.06);cursor:pointer;transition:transform .15s,box-shadow .15s}
+.dashboard-card:active{transform:scale(.98)}
+.dashboard-card-icon{width:42px;height:42px;border-radius:14px;background:#e6eff9;color:#3979c9;display:grid;place-items:center}
+.dashboard-card-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dashboard-card-title{font-size:17px;font-weight:750;letter-spacing:-.02em}
+.dashboard-card-subtitle{font-size:11px;line-height:1.45;color:#7b8795;margin-top:5px}
+.dashboard-card.budget .dashboard-card-icon{background:#edf1e9;color:#73866a}
+.dashboard-card.budget{background:linear-gradient(145deg,#fff 0%,#f4f6f0 100%)}
+.section-back{border:0;background:transparent;color:#3979c9;font:650 13px inherit;padding:7px 0 14px;cursor:pointer}
 #home>.date-row,#home>.progress-card,#home>.balance,#home>.section-head:not(.calendar-section-head),#home>.habits,#home>.hint{display:none!important}
-#home{display:block!important}
 .calendar-section-head{margin:0 0 14px;padding:2px 2px}
 .calendar-section-head h2{font-size:22px;letter-spacing:-.035em}
 .calendar-edit-toggle{width:46px;height:46px;border:1px solid #cbd8e7;border-radius:15px;background:linear-gradient(145deg,#fff,#edf4fc);color:#3979c9;box-shadow:0 4px 12px rgba(43,91,150,.12);transition:transform .16s,box-shadow .16s}
@@ -222,7 +233,6 @@ body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
 .calendar-edit-toggle[aria-pressed="true"]{background:linear-gradient(145deg,#dceafe,#c9defa);border-color:#3979c9;color:#174f91;box-shadow:0 4px 13px rgba(57,121,201,.2)}
 .calendar-card{margin-top:0}
 .toast{bottom:calc(18px + env(safe-area-inset-bottom))}
-
 /* Monthly trading goal and editable account balance */
 .finance-summary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 14px}
 .finance-card{min-width:0;padding:13px 12px;border:1px solid #e4e9ef;border-radius:15px;background:#fff;box-shadow:0 3px 12px rgba(35,55,80,.045)}
@@ -309,8 +319,9 @@ body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
 <body>
 <div class="app">
 <header class="top"><div class="brand"><b>NORDIC</b> <span>/ HABIT</span></div><div class="avatar" aria-hidden="true">✦</div></header>
-<section id="budget" class="tab-panel"><div class="eyebrow">Личные финансы</div><h1>Бюджет</h1><div class="stat-card" style="margin-top:20px"><div class="stat-label">Управление деньгами</div><div class="stat-number" style="font-size:18px">Календарь, категории и расходы</div><p class="profile-note">Здесь будет отдельный финансовый раздел: учёт доходов и трат, категории расходов и календарь бюджета.</p></div></section>
-<section id="home" class="tab-panel active">
+<section id="budget" class="tab-panel"><button type="button" class="section-back" data-open="dashboard">← Рабочий лист</button><div class="eyebrow">Личные финансы</div><h1>Бюджет</h1><div class="stat-card" style="margin-top:20px"><div class="stat-label">Новый раздел</div><div class="stat-number" style="font-size:18px">Бюджет и расходы</div><p class="profile-note">Здесь будет отдельный календарь бюджета, категории, доходы и траты. Пока оставил раздел пустым для следующих правок.</p></div></section>
+<section id="dashboard" class="tab-panel active"><div class="dashboard-head"><div class="eyebrow">ТВОЁ ПРОСТРАНСТВО</div><h1>Рабочий лист</h1></div><div class="dashboard-grid"><button type="button" class="dashboard-card trading" data-open="home"><span class="dashboard-card-icon"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 3 8-9"/><path d="M15 5h6v6"/></svg></span><span><span class="dashboard-card-title">Трейдинг</span><span class="dashboard-card-subtitle">Календарь и результаты торговли</span></span></button><button type="button" class="dashboard-card budget" data-open="budget"><span class="dashboard-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 9h18M7 15h3M7 2v3M17 2v3"/></svg></span><span><span class="dashboard-card-title">Бюджет</span><span class="dashboard-card-subtitle">Календарь, категории и расходы</span></span></button></div></section>
+<section id="home" class="tab-panel"><button type="button" class="section-back" data-open="dashboard">← Рабочий лист</button>
 <div class="date-row"><div><div class="eyebrow">Твой день</div><h1>Сегодня</h1></div><div class="date-label" id="todayDate"></div></div>
 <div class="progress-card">
 <div class="progress-title">Прогресс за сегодня</div>
@@ -374,10 +385,7 @@ body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
 <div class="stat-card"><button id="exportData" style="border:0;background:var(--sage-pale);color:#526b57;border-radius:12px;padding:11px 14px;font-weight:650">Экспортировать данные</button> <button id="resetData" style="border:0;background:#f3e9e5;color:#875d50;border-radius:12px;padding:11px 14px;font-weight:650">Сбросить данные</button></div>
 </section>
 </div>
-<nav class="bottom-nav" aria-label="Основные разделы">
-<button class="nav-btn" data-tab="budget"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 9h18M7 15h3M7 2v3M17 2v3"/></svg>Бюджет</button>
-<button class="nav-btn active" data-tab="home"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 3 8-9"/><path d="M15 5h6v6"/></svg>Трейдинг</button>
-</nav>
+
 <div class="toast" id="toast"></div>
 <script>
 (()=>{
@@ -462,9 +470,10 @@ $('habitList').addEventListener('click',e=>{
  if(!d[flag]&&id==='meditation')d.meditation='';
  store.days[dateKey]=d;save();render();
 });
-document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>{
- document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b===btn));
- document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===btn.dataset.tab));
+document.querySelectorAll('[data-open]').forEach(btn=>btn.addEventListener('click',()=>{
+ const target=btn.dataset.open;
+ document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===target));
+ window.scrollTo({top:0,behavior:'instant'});
 }));
 $('exportData').addEventListener('click',()=>{
  const blob=new Blob([JSON.stringify({habits:store,goals:plans,actualResults:actuals},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
