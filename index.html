@@ -576,11 +576,11 @@ function renderCalendar(){
  renderDayReview();
 }
 function renderDayReview(){
- const entry=actuals[selectedDate]||{};
+ const entry=actuals[dateKey]||{};
  const reviewComplete=typeof entry.goodMarket==='boolean'&&typeof entry.hadErrors==='boolean'&&!!entry.tradeTime;
  $('calendarEditToggle').classList.toggle('has-review-notice',!reviewComplete);
  $('calendarEditToggle').title=reviewComplete?'Отметки за день заполнены — можно отредактировать':'Заполни дневной обзор';
- $('dayReviewTitle').textContent='Отметки за '+new Date(selectedDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+ $('dayReviewTitle').textContent='Отметки за '+new Date(dateKey+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
  $('tradeTime').value=entry.tradeTime||'';
  $('tradeTime').disabled=!calendarEditMode;
  document.querySelectorAll('[data-review]').forEach(button=>{
@@ -635,13 +635,13 @@ $('calendarSessionSave').addEventListener('click',()=>{
 });
 $('dayReview').addEventListener('click',e=>{
  const button=e.target.closest('[data-review]');if(!button||!calendarEditMode)return;
- const key=selectedDate,entry={...(actuals[key]||{})};
+ const key=dateKey,entry={...(actuals[key]||{})};
  entry[button.dataset.review]=button.dataset.value==='true';actuals[key]=entry;
  renderCalendar();
 });
 $('tradeTime').addEventListener('change',()=>{
  if(!calendarEditMode)return;
- const key=selectedDate,entry={...(actuals[key]||{})},value=$('tradeTime').value;
+ const key=dateKey,entry={...(actuals[key]||{})},value=$('tradeTime').value;
  if(value)entry.tradeTime=value;else delete entry.tradeTime;
  if(Object.keys(entry).length)actuals[key]=entry;else delete actuals[key];
  renderCalendar();
