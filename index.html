@@ -162,6 +162,8 @@ body{background:#eef1f5;color:#171b22}
 
 .calendar-section-head{align-items:center;gap:10px}
 .calendar-edit-toggle{flex:none;width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--sage-dark);padding:0;font-size:22px;line-height:1;font-weight:650;cursor:pointer}
+.calendar-edit-toggle{position:relative}
+.calendar-edit-toggle.has-review-notice::after{content:'1';position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border:2px solid #fff;border-radius:999px;background:#dc514b;color:#fff;font-size:10px;font-weight:800;line-height:15px;text-align:center;box-shadow:0 2px 5px #0002}
 .calendar-edit-toggle[aria-pressed="true"]{background:#dceafe;border-color:#3979c9;color:#174f91}
 #calendarGrid.calendar-edit-mode .cal-day{outline:2px dashed #3979c9;outline-offset:-3px;cursor:crosshair}
 
@@ -576,6 +578,9 @@ function renderCalendar(){
 }
 function renderDayReview(){
  const entry=actuals[selectedDate]||{};
+ const reviewComplete=typeof entry.goodMarket==='boolean'&&typeof entry.hadErrors==='boolean'&&!!entry.tradeTime;
+ $('calendarEditToggle').classList.toggle('has-review-notice',!reviewComplete);
+ $('calendarEditToggle').title=reviewComplete?'Отметки за день заполнены — можно отредактировать':'Заполни дневной обзор';
  $('dayReviewTitle').textContent='Отметки за '+new Date(selectedDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
  $('tradeTime').value=entry.tradeTime||'';
  $('tradeTime').disabled=!calendarEditMode;
