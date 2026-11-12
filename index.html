@@ -504,6 +504,26 @@ const restoreIfRicher=(key,current,label)=>{
  return current;
 };
 actuals=restoreIfRicher(ACTUAL_KEY,actuals,'календаря');
+// Однократно очищаем старые отметки теста (в том числе на будущих датах),
+// сохраняя финансовые результаты, выводы и пополнения.
+const reviewCleanupKey='nordic-review-cleanup-v1';
+if(!localStorage.getItem(reviewCleanupKey)){
+ const cleanReviews=data=>{
+  for(const [key,value] of Object.entries(data||{})){
+   if(!value||typeof value!=='object')continue;
+   delete value.goodMarket;delete value.hadErrors;delete value.tradeTime;
+   if(!Object.keys(value).length)delete data[key];
+  }
+  return data||{};
+ };
+ actuals=cleanReviews(actuals);
+ localStorage.setItem(ACTUAL_KEY,JSON.stringify(actuals));
+ try{
+  const backup=JSON.parse(localStorage.getItem(ACTUAL_KEY+'-backup-v1'));
+  if(backup&&typeof backup==='object')localStorage.setItem(ACTUAL_KEY+'-backup-v1',JSON.stringify(cleanReviews(backup)));
+ }catch(e){}
+ localStorage.setItem(reviewCleanupKey,'done');
+}
 store=restoreIfRicher(KEY,store,'привычек');
 let accountState=null;
 const transactionTotal=()=>{const todayKey=iso(new Date());return Object.entries(actuals).reduce((sum,[date,v])=>date<=todayKey?sum+(entryResult(v)||0)+(entryDeposit(v)||0)-(entryWithdrawal(v)||0):sum,0)};
