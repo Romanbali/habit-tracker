@@ -217,6 +217,22 @@ body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 .dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
 .dashboard-card{appearance:none;width:100%;min-width:0;aspect-ratio:1/1;border:1px solid #e1e6ed;border-radius:20px;background:linear-gradient(145deg,#fff 0%,#f3f6fa 100%);padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;text-align:left;color:var(--ink);box-shadow:0 6px 18px rgba(38,55,76,.06);cursor:pointer;transition:transform .15s,box-shadow .15s}
 .dashboard-card:active{transform:scale(.98)}
+.dashboard-card{gap:8px;justify-content:flex-start}
+.dashboard-card-heading{display:flex;align-items:center;gap:9px}
+.dashboard-card-heading .dashboard-card-icon{width:34px;height:34px;border-radius:11px;flex:none}
+.dashboard-card-heading .dashboard-card-icon svg{width:18px;height:18px}
+.dashboard-card-title{font-size:15px}
+.mini-calendar{width:100%;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;flex:1;align-content:center}
+.mini-calendar .mini-weekday{font-size:8px;color:#8995a3;text-align:center;font-weight:650;padding-bottom:2px}
+.mini-calendar .mini-day{height:18px;display:grid;place-items:center;border-radius:6px;background:rgba(255,255,255,.78);font-size:9px;color:#536273;position:relative}
+.mini-calendar .mini-day.empty{background:transparent}
+.mini-calendar .mini-day.today{outline:1px solid #3979c9;font-weight:800}
+.mini-calendar .mini-day.profit{background:#e2f1e8;color:#286548}
+.mini-calendar .mini-day.loss{background:#f8e8e6;color:#a84343}
+.mini-calendar .mini-day .mini-mark{position:absolute;width:3px;height:3px;border-radius:50%;bottom:1px;background:currentColor}
+.dashboard-card.trading .dashboard-card-subtitle{margin-top:auto}
+.dashboard-card.budget{justify-content:space-between}
+
 .dashboard-card-icon{width:42px;height:42px;border-radius:14px;background:#e6eff9;color:#3979c9;display:grid;place-items:center}
 .dashboard-card-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .dashboard-card-title{font-size:17px;font-weight:750;letter-spacing:-.02em}
@@ -320,7 +336,7 @@ body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 <div class="app">
 <header class="top"><div class="brand"><b>NORDIC</b> <span>/ HABIT</span></div><div class="avatar" aria-hidden="true">✦</div></header>
 <section id="budget" class="tab-panel"><button type="button" class="section-back" data-open="dashboard">← Рабочий лист</button><div class="eyebrow">Личные финансы</div><h1>Бюджет</h1><div class="stat-card" style="margin-top:20px"><div class="stat-label">Новый раздел</div><div class="stat-number" style="font-size:18px">Бюджет и расходы</div><p class="profile-note">Здесь будет отдельный календарь бюджета, категории, доходы и траты. Пока оставил раздел пустым для следующих правок.</p></div></section>
-<section id="dashboard" class="tab-panel active"><div class="dashboard-head"><div class="eyebrow">ТВОЁ ПРОСТРАНСТВО</div><h1>Рабочий лист</h1></div><div class="dashboard-grid"><button type="button" class="dashboard-card trading" data-open="home"><span class="dashboard-card-icon"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 3 8-9"/><path d="M15 5h6v6"/></svg></span><span><span class="dashboard-card-title">Трейдинг</span><span class="dashboard-card-subtitle">Календарь и результаты торговли</span></span></button><button type="button" class="dashboard-card budget" data-open="budget"><span class="dashboard-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 9h18M7 15h3M7 2v3M17 2v3"/></svg></span><span><span class="dashboard-card-title">Бюджет</span><span class="dashboard-card-subtitle">Календарь, категории и расходы</span></span></button></div></section>
+<section id="dashboard" class="tab-panel active"><div class="dashboard-head"><div class="eyebrow">ТВОЁ ПРОСТРАНСТВО</div><h1>Рабочий лист</h1></div><div class="dashboard-grid"><button type="button" class="dashboard-card trading" data-open="home"><span class="dashboard-card-heading"><span class="dashboard-card-icon"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 3 8-9"/><path d="M15 5h6v6"/></svg></span><span class="dashboard-card-title">Трейдинг</span></span><span class="mini-calendar" id="miniTradingCalendar" aria-hidden="true"></span><span class="dashboard-card-subtitle">Открыть календарь →</span></button><button type="button" class="dashboard-card budget" data-open="budget"><span class="dashboard-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 9h18M7 15h3M7 2v3M17 2v3"/></svg></span><span><span class="dashboard-card-title">Бюджет</span><span class="dashboard-card-subtitle">Календарь, категории и расходы</span></span></button></div></section>
 <section id="home" class="tab-panel"><button type="button" class="section-back" data-open="dashboard">← Рабочий лист</button>
 <div class="date-row"><div><div class="eyebrow">Твой день</div><h1>Сегодня</h1></div><div class="date-label" id="todayDate"></div></div>
 <div class="progress-card">
@@ -586,6 +602,17 @@ function renderFinance(){
  const withdrawals=monthEntries.reduce((s,v)=>s+(entryWithdrawal(v)||0),0);
  $('accountWithdrawalsValue').textContent=money(withdrawals);
 }
+function renderMiniTradingCalendar(){
+ const el=$('miniTradingCalendar');if(!el)return;
+ const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),offset=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate(),today=iso(new Date()),names=['П','В','С','Ч','П','С','В'];
+ let html=names.map(n=>'<span class="mini-weekday">'+n+'</span>').join('');
+ for(let i=0;i<offset;i++)html+='<span class="mini-day empty"></span>';
+ for(let d=1;d<=days;d++){
+  const key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'),res=entryResult(actuals[key]),has=res!==null&&Number.isFinite(res),cls='mini-day'+(key===today?' today':'')+(has&&res>0?' profit':has&&res<0?' loss':'');
+  html+='<span class="'+cls+'">'+d+(has?'<i class="mini-mark"></i>':'')+'</span>';
+ }
+ el.innerHTML=html;
+}
 function renderCalendar(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
  $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
@@ -603,7 +630,7 @@ function renderCalendar(){
   out+='<button type="button" class="'+cls+'" data-date="'+key+'">'+(tradeTime?'<small class="trade-time-badge">'+tradeTime+'</small>':'')+(hasWithdrawal?'<small class="withdrawal-label">⇧ '+money(withdrawalAmount)+'</small>':'')+'<span class="day-number">'+day+'</span>'+(hasResult?'<small>'+money(result)+'</small>':'')+(hasDeposit?'<small class="deposit-label">＋ '+money(depositAmount)+'</small>':'')+(dots?'<span class="review-dots">'+dots+'</span>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
- renderDayReview();
+ renderDayReview();renderMiniTradingCalendar();
 }
 function renderDayReview(){
   const reviewDate=selectedDate;
