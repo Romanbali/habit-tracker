@@ -320,7 +320,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 <div class="habits" id="habitList"></div>
 <p class="hint">Отмечай привычки по мере выполнения. Прогресс и записи сохраняются на этом устройстве.</p>
 <div class="section-head calendar-section-head"><h2>Календарь трейдинга</h2><button type="button" class="calendar-edit-toggle" id="calendarEditToggle" aria-label="Режим редактирования календаря" title="Редактировать любой день" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.8 6.2 3 3M4 20l5.2-1.2"/></svg></button></div>
-<div class="calendar-session-actions" id="calendarSessionActions" style="display:none"><button type="button" id="calendarSessionCancel" aria-label="Выйти без сохранения" title="Выйти без сохранения">×</button><button type="button" id="calendarBackupDownload" title="Скачать резервную копию">Скачать копию</button><button type="button" id="calendarSessionSave">Сохранить</button></div>
+<div class="calendar-session-actions" id="calendarSessionActions" style="display:none"><button type="button" id="calendarSessionCancel" aria-label="Выйти без сохранения" title="Выйти без сохранения">×</button><button type="button" id="calendarSessionSave">Сохранить</button></div>
 <div class="calendar-card">
  <div class="calendar-head"><button type="button" class="month-arrow" id="prevMonth" aria-label="Предыдущий месяц">‹</button><div class="month-title" id="calendarMonth"></div><button type="button" class="month-arrow" id="nextMonth" aria-label="Следующий месяц">›</button></div>
  <div class="finance-summary">
@@ -348,6 +348,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
  </div>
 
 
+<div class="calendar-backup-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)"><button type="button" id="calendarBackupDownload" style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 12px;font-weight:650">Скачать копию</button><button type="button" id="calendarBackupRestore" style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 12px;font-weight:650">Восстановить копию</button><input type="file" id="calendarBackupFile" accept="application/json,.json" hidden></div>
 </div>
 </section>
 <section id="habits" class="tab-panel">
@@ -654,6 +655,19 @@ function cancelCalendarEdit(){
 }
 $('calendarSessionCancel').addEventListener('click',cancelCalendarEdit);
 $('calendarBackupDownload').addEventListener('click',downloadFullBackup);
+$('calendarBackupRestore').addEventListener('click',()=>{if(calendarEditMode){toast('Сначала сохрани или отмени редактирование');return}$('calendarBackupFile').click()});
+$('calendarBackupFile').addEventListener('change',async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+  const backup=JSON.parse(await file.text());
+  if(backup.format!=='nordic-habit-full-backup'||!backup.storage||typeof backup.storage!=='object')throw new Error('Invalid backup');
+  if(!confirm('Восстановить резервную копию? Текущие данные будут заменены данными из файла.'))return;
+  const allowed=[KEY,PLAN_KEY,ACTUAL_KEY,ACCOUNT_KEY,KEY+'-backup-v1',PLAN_KEY+'-backup-v1',ACTUAL_KEY+'-backup-v1',ACCOUNT_KEY+'-backup-v1',screenshotSeedKey,screenshotSeedKey+'-balance','nordic-review-cleanup-v1'];
+  for(const key of allowed){if(Object.prototype.hasOwnProperty.call(backup.storage,key))localStorage.setItem(key,backup.storage[key]);else if([KEY,PLAN_KEY,ACTUAL_KEY,ACCOUNT_KEY].includes(key))localStorage.removeItem(key)}
+  location.reload();
+ }catch(err){toast('Не удалось восстановить копию: проверь файл')}
+ finally{e.target.value=''}
+});
 $('calendarSessionSave').addEventListener('click',()=>{
  if(externalChangeDuringEdit){cancelCalendarEdit();toast('Данные обновились в другой вкладке. Черновик отменён — открой редактирование снова.');return}
   // Сохраняем дневные суммы и ответы теста без изменений.
