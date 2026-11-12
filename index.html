@@ -338,7 +338,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
  </div>
  <div class="calendar-grid" id="calendarGrid"></div>
 
- <div class="calendar-legend"><span><i class="legend-dot done-dot"></i>Хороший рынок — да</span><span><i class="legend-dot loss-dot"></i>Хороший рынок — нет</span><span><i class="legend-dot loss-dot"></i>Ошибки — да</span><span><i class="legend-dot profit-dot"></i>Ошибки — нет</span></div>
+ 
  <div class="day-review" id="dayReview">
   <div class="day-review-head"><div class="day-review-title" id="dayReviewTitle">Отметки за день</div><button type="button" class="day-review-reset" id="dayReviewReset" hidden>Сбросить тест</button></div>
   <div class="day-review-row"><span>Торговал на хорошем рынке</span><div class="day-review-options"><button type="button" data-review="goodMarket" data-value="true">Да</button><button type="button" data-review="goodMarket" data-value="false">Нет</button></div></div>
@@ -348,7 +348,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
  </div>
 
 
-<div class="calendar-backup-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)"><button type="button" id="calendarBackupDownload" style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 12px;font-weight:650">Скачать копию</button><button type="button" id="calendarBackupRestore" style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 12px;font-weight:650">Восстановить копию</button><input type="file" id="calendarBackupFile" accept="application/json,.json" hidden></div>
+<div class="calendar-backup-actions" id="calendarBackupActions" hidden style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)"><button type="button" id="calendarBackupDownload" style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 12px;font-weight:650">Скачать копию</button><button type="button" id="calendarBackupRestore" style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 12px;font-weight:650">Восстановить копию</button><input type="file" id="calendarBackupFile" accept="application/json,.json" hidden></div>
 </div>
 </section>
 <section id="habits" class="tab-panel">
@@ -655,7 +655,7 @@ function cancelCalendarEdit(){
 }
 $('calendarSessionCancel').addEventListener('click',cancelCalendarEdit);
 $('calendarBackupDownload').addEventListener('click',downloadFullBackup);
-$('calendarBackupRestore').addEventListener('click',()=>{if(calendarEditMode){toast('Сначала сохрани или отмени редактирование');return}$('calendarBackupFile').click()});
+$('calendarBackupRestore').addEventListener('click',()=>{$('calendarBackupFile').click()});
 $('calendarBackupFile').addEventListener('change',async e=>{
  const file=e.target.files&&e.target.files[0];if(!file)return;
  try{
