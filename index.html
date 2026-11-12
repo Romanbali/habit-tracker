@@ -209,9 +209,9 @@ body{background:#eef1f5;color:#171b22}
 .cal-day.future.positive,.cal-day.future.negative{background:#f5f7fa!important;border-color:#e5e9ef!important;color:#aeb6c1!important}
 
 /* Calendar-only layout */
-body{padding-bottom:env(safe-area-inset-bottom)}
+body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
 .app{padding-top:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
-.app>.top,.bottom-nav{display:none!important}
+.app>.top{display:none!important}.bottom-nav{display:grid!important;position:fixed!important;z-index:50!important;bottom:0!important;left:50%!important;transform:translateX(-50%)!important;width:min(520px,100%)!important;}
 #home>.date-row,#home>.progress-card,#home>.balance,#home>.section-head:not(.calendar-section-head),#home>.habits,#home>.hint{display:none!important}
 #home{display:block!important}
 .calendar-section-head{margin:0 0 14px;padding:2px 2px}
