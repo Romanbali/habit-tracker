@@ -576,21 +576,23 @@ function renderCalendar(){
  renderDayReview();
 }
 function renderDayReview(){
- const entry=actuals[dateKey]||{};
+  const reviewDate=selectedDate;
+  const isFutureReview=reviewDate>dateKey;
+  const entry=actuals[reviewDate]||{};
  const reviewComplete=typeof entry.goodMarket==='boolean'&&typeof entry.hadErrors==='boolean'&&!!entry.tradeTime;
  $('calendarEditToggle').classList.toggle('has-review-notice',!reviewComplete);
  $('calendarEditToggle').title=reviewComplete?'Отметки за день заполнены — можно отредактировать':'Заполни дневной обзор';
- $('dayReviewTitle').textContent='Отметки за '+new Date(dateKey+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+ $('dayReviewTitle').textContent='Отметки за '+new Date(reviewDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
  $('tradeTime').value=entry.tradeTime||'';
- $('tradeTime').disabled=!calendarEditMode;
+ $('tradeTime').disabled=!calendarEditMode||isFutureReview;
  document.querySelectorAll('[data-review]').forEach(button=>{
   const value=entry[button.dataset.review];
   button.classList.toggle('active-yes',value===true&&button.dataset.value==='true');
   button.classList.toggle('active-no',value===false&&button.dataset.value==='false');
   button.setAttribute('aria-pressed',String(value===(button.dataset.value==='true')));
-  button.disabled=!calendarEditMode;
+  button.disabled=!calendarEditMode||isFutureReview;
  });
- $('dayReviewHint').textContent=calendarEditMode?'Отметки сохранятся вместе с кнопкой «Сохранить» сверху':'Нажми на карандаш, чтобы изменить отметки';
+ $('dayReviewHint').textContent=isFutureReview?'Нельзя заполнять отметки за будущие дни':calendarEditMode?'Отметки сохранятся вместе с кнопкой «Сохранить» сверху':'Нажми на карандаш, чтобы изменить отметки';
 }
 let calendarEditMode=false,rangeStart=null,rangeEnd=null,originalActuals=null,originalAccountState=null,externalChangeDuringEdit=false;
 const cloneData=v=>v==null?v:JSON.parse(JSON.stringify(v));
@@ -635,13 +637,13 @@ $('calendarSessionSave').addEventListener('click',()=>{
 });
 $('dayReview').addEventListener('click',e=>{
  const button=e.target.closest('[data-review]');if(!button||!calendarEditMode)return;
- const key=dateKey,entry={...(actuals[key]||{})};
- entry[button.dataset.review]=button.dataset.value==='true';actuals[key]=entry;
+ const key=selectedDate;if(key>dateKey)return;const entry={...(actuals[key]||{})};
+  entry[button.dataset.review]=button.dataset.value==='true';actuals[key]=entry;
  renderCalendar();
 });
 $('tradeTime').addEventListener('change',()=>{
  if(!calendarEditMode)return;
- const key=dateKey,entry={...(actuals[key]||{})},value=$('tradeTime').value;
+ const key=selectedDate;if(key>dateKey)return;const entry={...(actuals[key]||{})},value=$('tradeTime').value;
  if(value)entry.tradeTime=value;else delete entry.tradeTime;
  if(Object.keys(entry).length)actuals[key]=entry;else delete actuals[key];
  renderCalendar();
