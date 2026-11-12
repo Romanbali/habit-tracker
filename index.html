@@ -265,7 +265,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .cal-day .review-dot{width:6px;height:6px;border-radius:50%;display:block;flex:none}
 .cal-day .trade-time-badge{position:absolute;z-index:4;right:-5px;top:-7px;padding:3px 5px;border-radius:8px;background:#347fc7;color:#fff!important;font-size:8px!important;line-height:1.15;font-weight:800;box-shadow:0 2px 5px #1e355533;white-space:nowrap;transform:rotate(2deg)}
 .day-review{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:14px;background:#f8fafc}
-.day-review-title{font-size:13px;font-weight:750;margin-bottom:8px}
+.day-review-title{font-size:13px;font-weight:750;margin-bottom:8px}.day-review-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.day-review-head .day-review-title{margin:0}.day-review-reset{border:1px solid #e2a5a1;border-radius:8px;background:#fff0ef;color:#a84343;padding:5px 8px;font-size:10px;font-weight:700}.day-review-reset[hidden]{display:none!important}
 .day-review-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #e8edf2;font-size:12px;color:var(--ink)}
 .day-review-options{display:flex;gap:5px;flex:none}
 .day-review-options button{border:1px solid #dce3eb;background:#fff;color:#667384;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700}
@@ -340,7 +340,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 
  <div class="calendar-legend"><span><i class="legend-dot done-dot"></i>Хороший рынок — да</span><span><i class="legend-dot loss-dot"></i>Хороший рынок — нет</span><span><i class="legend-dot loss-dot"></i>Ошибки — да</span><span><i class="legend-dot profit-dot"></i>Ошибки — нет</span></div>
  <div class="day-review" id="dayReview">
-  <div class="day-review-title" id="dayReviewTitle">Отметки за день</div>
+  <div class="day-review-head"><div class="day-review-title" id="dayReviewTitle">Отметки за день</div><button type="button" class="day-review-reset" id="dayReviewReset" hidden>Сбросить тест</button></div>
   <div class="day-review-row"><span>Торговал на хорошем рынке</span><div class="day-review-options"><button type="button" data-review="goodMarket" data-value="true">Да</button><button type="button" data-review="goodMarket" data-value="false">Нет</button></div></div>
   <label class="day-review-row"><span>Время торговли</span><input type="time" id="tradeTime" aria-label="Время торговли"></label>
   <div class="day-review-row"><span>Были ли ошибки?</span><div class="day-review-options"><button type="button" data-review="hadErrors" data-value="true">Да</button><button type="button" data-review="hadErrors" data-value="false">Нет</button></div></div>
@@ -579,8 +579,11 @@ function renderDayReview(){
   const reviewDate=selectedDate;
   const isFutureReview=reviewDate>dateKey;
   const entry=actuals[reviewDate]||{};
- const reviewComplete=typeof entry.goodMarket==='boolean'&&typeof entry.hadErrors==='boolean'&&!!entry.tradeTime;
- $('calendarEditToggle').classList.toggle('has-review-notice',!reviewComplete);
+  const todayEntry=actuals[dateKey]||{};
+  const todayReviewComplete=typeof todayEntry.goodMarket==='boolean'&&typeof todayEntry.hadErrors==='boolean'&&!!todayEntry.tradeTime;
+  const reviewHasData=typeof entry.goodMarket==='boolean'||typeof entry.hadErrors==='boolean'||!!entry.tradeTime;
+  $('calendarEditToggle').classList.toggle('has-review-notice',!todayReviewComplete);
+  $('dayReviewReset').hidden=!calendarEditMode||!reviewHasData||isFutureReview;
  $('calendarEditToggle').title=reviewComplete?'Отметки за день заполнены — можно отредактировать':'Заполни дневной обзор';
  $('dayReviewTitle').textContent='Отметки за '+new Date(reviewDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
  $('tradeTime').value=entry.tradeTime||'';
@@ -600,7 +603,7 @@ const cloneData=v=>v==null?v:JSON.parse(JSON.stringify(v));
 $('calendarEditToggle').addEventListener('click',()=>{
  if(calendarEditMode){cancelCalendarEdit();return}
  originalActuals=cloneData(actuals)||{};originalAccountState=cloneData(accountState);externalChangeDuringEdit=false;
- calendarEditMode=true;rangeStart=null;rangeEnd=null;
+  calendarEditMode=true;rangeStart=null;rangeEnd=null;selectedDate=dateKey;viewMonth=new Date(today.getFullYear(),today.getMonth(),1);
  $('calendarSessionActions').style.display='flex';
  $('calendarEditToggle').setAttribute('aria-pressed',String(calendarEditMode));
  $('calendarEditToggle').setAttribute('aria-label',calendarEditMode?'Выбери день календаря':'Режим редактирования календаря');
@@ -635,7 +638,14 @@ $('calendarSessionSave').addEventListener('click',()=>{
  if(JSON.stringify(accountState)!==JSON.stringify(originalAccountState))safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));
  finishCalendarEdit();renderCalendar();toast('Все изменения сохранены');
 });
-$('dayReview').addEventListener('click',e=>{
+$('dayReviewReset').addEventListener('click',()=>{
+  if(!calendarEditMode||selectedDate>dateKey)return;
+  const key=selectedDate,entry={...(actuals[key]||{})};
+  delete entry.goodMarket;delete entry.hadErrors;delete entry.tradeTime;
+  if(Object.keys(entry).length)actuals[key]=entry;else delete actuals[key];
+  renderCalendar();toast('Отметки теста сброшены — нажми «Сохранить» сверху');
+ });
+ $('dayReview').addEventListener('click',e=>{
  const button=e.target.closest('[data-review]');if(!button||!calendarEditMode)return;
  const key=selectedDate;if(key>dateKey)return;const entry={...(actuals[key]||{})};
   entry[button.dataset.review]=button.dataset.value==='true';actuals[key]=entry;
