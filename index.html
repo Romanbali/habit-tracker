@@ -258,7 +258,19 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .account-card-heading .account-edit-toggle{margin:0;flex:none;width:28px;height:28px}
 .finance-card.account-balance>.finance-value{margin:12px 0 0!important;font-size:27px;line-height:1.15;letter-spacing:-.045em}
 .finance-card.account-balance .account-edit-panel{width:100%;margin-top:12px}
-.cal-day{position:relative;min-height:72px;padding:6px 3px;gap:4px}
+.cal-day{position:relative;min-height:72px;padding:6px 3px;gap:4px;overflow:visible}
+.cal-day .review-dots{display:flex;gap:4px;align-items:center;justify-content:center;min-height:6px}
+.cal-day .review-dot{width:6px;height:6px;border-radius:50%;display:block;flex:none}
+.cal-day .trade-time-badge{position:absolute;z-index:4;right:-5px;top:-7px;padding:3px 5px;border-radius:8px;background:#347fc7;color:#fff!important;font-size:8px!important;line-height:1.15;font-weight:800;box-shadow:0 2px 5px #1e355533;white-space:nowrap;transform:rotate(2deg)}
+.day-review{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:14px;background:#f8fafc}
+.day-review-title{font-size:13px;font-weight:750;margin-bottom:8px}
+.day-review-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #e8edf2;font-size:12px;color:var(--ink)}
+.day-review-options{display:flex;gap:5px;flex:none}
+.day-review-options button{border:1px solid #dce3eb;background:#fff;color:#667384;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700}
+.day-review-options button.active-yes{background:#e3f2e8;border-color:#8cbea0;color:#286548}
+.day-review-options button.active-no{background:#f9e8e7;border-color:#dfa19d;color:#a84343}
+#tradeTime{width:100px;border:1px solid #dce3eb;border-radius:8px;padding:6px 8px;background:#fff;color:var(--ink);font:600 12px inherit}
+.day-review-hint{font-size:10px;color:var(--muted);margin-top:8px}
 .cal-day .withdrawal-label{align-self:center!important;display:inline-flex!important;justify-content:center;align-items:center;max-width:calc(100% - 4px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:3px 6px!important;margin:0 0 1px!important;border-radius:7px!important;background:#fff0bd!important;color:#916000!important;font-size:9px!important;font-weight:800!important;line-height:1.2!important}
 .cal-day.future .withdrawal-label{background:#fff7e1!important;color:#ad914f!important}
 .cal-day .deposit-label{align-self:center;display:inline-flex;justify-content:center;max-width:calc(100% - 4px);white-space:nowrap;padding:2px 5px;border-radius:6px;background:#e8f4ed;color:#347451!important;font-size:8px!important;font-weight:750!important}
@@ -317,7 +329,14 @@ body{padding-bottom:env(safe-area-inset-bottom)}
  </div>
  <div class="calendar-grid" id="calendarGrid"></div>
 
- <div class="calendar-legend"><span><i class="legend-dot done-dot"></i>Торговал</span><span><i class="legend-dot profit-dot"></i>Плюс</span><span><i class="legend-dot loss-dot"></i>Минус</span></div>
+ <div class="calendar-legend"><span><i class="legend-dot done-dot"></i>Хороший рынок — да</span><span><i class="legend-dot loss-dot"></i>Хороший рынок — нет</span><span><i class="legend-dot loss-dot"></i>Ошибки — да</span><span><i class="legend-dot profit-dot"></i>Ошибки — нет</span></div>
+ <div class="day-review" id="dayReview">
+  <div class="day-review-title" id="dayReviewTitle">Отметки за день</div>
+  <div class="day-review-row"><span>Торговал на хорошем рынке</span><div class="day-review-options"><button type="button" data-review="goodMarket" data-value="true">Да</button><button type="button" data-review="goodMarket" data-value="false">Нет</button></div></div>
+  <label class="day-review-row"><span>Время торговли</span><input type="time" id="tradeTime" aria-label="Время торговли"></label>
+  <div class="day-review-row"><span>Были ли ошибки?</span><div class="day-review-options"><button type="button" data-review="hadErrors" data-value="true">Да</button><button type="button" data-review="hadErrors" data-value="false">Нет</button></div></div>
+  <div class="day-review-hint" id="dayReviewHint">Включи редактирование календаря, чтобы изменить отметки</div>
+ </div>
 
 
 </div>
@@ -412,7 +431,7 @@ function renderWeek(){
  const start=new Date(today);const wd=(start.getDay()+6)%7;start.setDate(start.getDate()-wd);
  $('weekStrip').innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const key=iso(d);return '<div class="week-day '+(key===dateKey?'today':'')+'">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]+'<b>'+d.getDate()+'</b></div>'}).join('');
 }
-$('habitList').addEventListener('click',e=>{if(e.target.id!=='saveTradeResult')return;const input=$('tradeResultInput'),raw=input.value.trim();if(raw!==''&&!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}else{const old=actuals[selectedDate],withdrawal=entryWithdrawal(old),deposit=entryDeposit(old);if(raw===''){if(withdrawal===null&&deposit===null)delete actuals[selectedDate];else actuals[selectedDate]={result:null,withdrawal,deposit}}else{actuals[selectedDate]={result:Number(raw),withdrawal,deposit}}}safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Финансовый результат сохранён')});
+$('habitList').addEventListener('click',e=>{if(e.target.id!=='saveTradeResult')return;const input=$('tradeResultInput'),raw=input.value.trim();if(raw!==''&&!Number.isFinite(Number(raw))){toast('Введи корректную сумму');return}else{const old=actuals[selectedDate]||{},withdrawal=entryWithdrawal(old),deposit=entryDeposit(old);if(raw===''){const next={...old,result:null,withdrawal,deposit};if(withdrawal===null&&deposit===null&&next.goodMarket===undefined&&next.hadErrors===undefined&&!next.tradeTime)delete actuals[selectedDate];else actuals[selectedDate]=next}else{actuals[selectedDate]={...old,result:Number(raw),withdrawal,deposit}}}safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));renderCalendar();toast('Финансовый результат сохранён')});
 $('habitList').addEventListener('change',e=>{
  const id=e.target.dataset.input;if(!id)return;
  const d=getDay(dateKey);d[id]=e.target.value;
@@ -544,11 +563,27 @@ function renderCalendar(){
   const key=prefix+String(day).padStart(2,'0'),entry=actuals[key],result=entryResult(entry),withdrawalAmount=entryWithdrawal(entry),depositAmount=entryDeposit(entry),hasResult=result!==null&&Number.isFinite(result),hasWithdrawal=withdrawalAmount!==null&&Number.isFinite(withdrawalAmount),hasDeposit=depositAmount!==null&&Number.isFinite(depositAmount),has=hasResult||hasWithdrawal||hasDeposit,todayKey=iso(new Date()),past=key<todayKey,future=key>todayKey;
   const rangeLow=rangeStart&&rangeEnd?(rangeStart<rangeEnd?rangeStart:rangeEnd):rangeStart,rangeHigh=rangeStart&&rangeEnd?(rangeStart>rangeEnd?rangeStart:rangeEnd):rangeStart;
   const inRange=calendarEditMode&&rangeLow&&key>=rangeLow&&key<=rangeHigh;
+  const good=entry&&typeof entry.goodMarket==='boolean'?entry.goodMarket:null,errors=entry&&typeof entry.hadErrors==='boolean'?entry.hadErrors:null,tradeTime=entry&&entry.tradeTime?String(entry.tradeTime):'';
   const cls='cal-day '+(key===selectedDate?'selected ':'')+(past?'past ':'')+(future?'future ':'')+(inRange?'range-picked ':'')+(key===rangeStart||key===rangeEnd?'range-edge ':'')+(hasResult&&result<0?'negative ':hasResult&&result>0?'positive ':'');
-  out+='<button type="button" class="'+cls+'" data-date="'+key+'">'+(hasWithdrawal?'<small class="withdrawal-label">⇧ '+money(withdrawalAmount)+'</small>':'')+'<span class="day-number">'+day+'</span>'+(hasResult?'<small>'+money(result)+'</small>':'')+(hasDeposit?'<small class="deposit-label">＋ '+money(depositAmount)+'</small>':'')+'</button>';
+  const dots=(good===null?'':'<i class="review-dot" style="background:'+(good?'#6e9a70':'#c96d61')+'"></i>')+(errors===null?'':'<i class="review-dot" style="background:'+(errors?'#c96d61':'#6e9a70')+'"></i>');
+  out+='<button type="button" class="'+cls+'" data-date="'+key+'">'+(tradeTime?'<small class="trade-time-badge">'+tradeTime+'</small>':'')+(hasWithdrawal?'<small class="withdrawal-label">⇧ '+money(withdrawalAmount)+'</small>':'')+'<span class="day-number">'+day+'</span>'+(hasResult?'<small>'+money(result)+'</small>':'')+(hasDeposit?'<small class="deposit-label">＋ '+money(depositAmount)+'</small>':'')+(dots?'<span class="review-dots">'+dots+'</span>':'')+'</button>';
  }
  $('calendarGrid').innerHTML=out;
-
+ renderDayReview();
+}
+function renderDayReview(){
+ const entry=actuals[selectedDate]||{};
+ $('dayReviewTitle').textContent='Отметки за '+new Date(selectedDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+ $('tradeTime').value=entry.tradeTime||'';
+ $('tradeTime').disabled=!calendarEditMode;
+ document.querySelectorAll('[data-review]').forEach(button=>{
+  const value=entry[button.dataset.review];
+  button.classList.toggle('active-yes',value===true&&button.dataset.value==='true');
+  button.classList.toggle('active-no',value===false&&button.dataset.value==='false');
+  button.setAttribute('aria-pressed',String(value===(button.dataset.value==='true')));
+  button.disabled=!calendarEditMode;
+ });
+ $('dayReviewHint').textContent=calendarEditMode?'Отметки сохранятся вместе с кнопкой «Сохранить» сверху':'Нажми на карандаш, чтобы изменить отметки';
 }
 let calendarEditMode=false,rangeStart=null,rangeEnd=null,originalActuals=null,originalAccountState=null,externalChangeDuringEdit=false;
 const cloneData=v=>v==null?v:JSON.parse(JSON.stringify(v));
@@ -563,6 +598,7 @@ $('calendarEditToggle').addEventListener('click',()=>{
  $('accountEditToggle').hidden=!calendarEditMode;
  $('accountEditPanel').hidden=true;
  $('calendarGrid').classList.toggle('calendar-edit-mode',calendarEditMode);
+ renderDayReview();
  $('calendarRangeEditor').hidden=true;
  if(calendarEditMode)toast('Выбери дату для редактирования');
  renderCalendar();
@@ -589,6 +625,19 @@ $('calendarSessionSave').addEventListener('click',()=>{
  safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));
  if(JSON.stringify(accountState)!==JSON.stringify(originalAccountState))safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));
  finishCalendarEdit();renderCalendar();toast('Все изменения сохранены');
+});
+$('dayReview').addEventListener('click',e=>{
+ const button=e.target.closest('[data-review]');if(!button||!calendarEditMode)return;
+ const key=selectedDate,entry={...(actuals[key]||{})};
+ entry[button.dataset.review]=button.dataset.value==='true';actuals[key]=entry;
+ renderCalendar();
+});
+$('tradeTime').addEventListener('change',()=>{
+ if(!calendarEditMode)return;
+ const key=selectedDate,entry={...(actuals[key]||{})},value=$('tradeTime').value;
+ if(value)entry.tradeTime=value;else delete entry.tradeTime;
+ if(Object.keys(entry).length)actuals[key]=entry;else delete actuals[key];
+ renderCalendar();
 });
 $('calendarGrid').addEventListener('click',e=>{
  const day=e.target.closest('[data-date]');if(!day)return;
@@ -623,6 +672,7 @@ $('calendarRangeSave').addEventListener('click',()=>{
   const key=iso(cursor);
   const previous=actuals[key],isRange=rangeStart!==rangeEnd;
   const next={
+   ...previous,
    result:resultRaw===''?(isRange?entryResult(previous):null):Number(resultRaw),
    withdrawal:withdrawalRaw===''?(isRange?entryWithdrawal(previous):null):Number(withdrawalRaw),
    deposit:depositRaw===''?(isRange?entryDeposit(previous):null):Number(depositRaw)
