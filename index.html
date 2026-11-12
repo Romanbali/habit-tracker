@@ -511,12 +511,7 @@ const entryResult=v=>{if(v==null)return null;if(typeof v!=='object')return Numbe
 const entryWithdrawal=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'withdrawal'))return v.withdrawal==null?null:Number(v.withdrawal);return v.type==='withdrawal'?entryAmount(v):null};
 const entryDeposit=v=>{if(!v||typeof v!=='object')return null;if(Object.prototype.hasOwnProperty.call(v,'deposit'))return v.deposit==null?null:Number(v.deposit);return null};
 
-// Снимок баланса $358 фиксируем после объявления финансовых функций.
-if(localStorage.getItem(screenshotSeedKey)==='done'&&!localStorage.getItem(screenshotSeedKey+'-balance')){
- accountState={value:358,snapshot:transactionTotal()};
- localStorage.setItem(ACCOUNT_KEY,JSON.stringify(accountState));
- localStorage.setItem(screenshotSeedKey+'-balance','done');
-}
+// Сохраняем установленный пользователем баланс: автоматическая переустановка запрещена.
 
 // Однократное заполнение октября и ноября 2026 по данным со скриншотов.
 // Сначала сохраняем прежние записи в резервную копию; остальные месяцы не трогаем.
