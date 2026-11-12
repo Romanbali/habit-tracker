@@ -656,12 +656,7 @@ $('calendarSessionCancel').addEventListener('click',cancelCalendarEdit);
 $('calendarBackupDownload').addEventListener('click',downloadFullBackup);
 $('calendarSessionSave').addEventListener('click',()=>{
  if(externalChangeDuringEdit){cancelCalendarEdit();toast('Данные обновились в другой вкладке. Черновик отменён — открой редактирование снова.');return}
- // Clear every review entry while preserving all financial fields.
-  for(const [key,value] of Object.entries(actuals)){
-   if(!value||typeof value!=='object')continue;
-   delete value.goodMarket;delete value.hadErrors;delete value.tradeTime;
-   if(!Object.keys(value).length)delete actuals[key];
-  }
+  // Сохраняем дневные суммы и ответы теста без изменений.
   safeSetItem(ACTUAL_KEY,JSON.stringify(actuals));
   if(JSON.stringify(accountState)!==JSON.stringify(originalAccountState))safeSetItem(ACCOUNT_KEY,JSON.stringify(accountState));
  finishCalendarEdit();renderCalendar();toast('Все изменения сохранены');
