@@ -629,6 +629,7 @@ $('calendarEditToggle').addEventListener('click',()=>{
  originalActuals=cloneData(actuals)||{};originalAccountState=cloneData(accountState);externalChangeDuringEdit=false;
   calendarEditMode=true;rangeStart=null;rangeEnd=null;selectedDate=dateKey;viewMonth=new Date(today.getFullYear(),today.getMonth(),1);
  $('calendarSessionActions').style.display='flex';
+ $('calendarBackupActions').hidden=false;
  $('calendarEditToggle').setAttribute('aria-pressed',String(calendarEditMode));
  $('calendarEditToggle').setAttribute('aria-label',calendarEditMode?'Выбери день календаря':'Режим редактирования календаря');
  $('accountEditToggle').hidden=!calendarEditMode;
@@ -641,7 +642,7 @@ $('calendarEditToggle').addEventListener('click',()=>{
 });
 function finishCalendarEdit(){
   calendarEditMode=false;$('dayReview').hidden=true;rangeStart=null;rangeEnd=null;originalActuals=null;originalAccountState=null;
- $('calendarSessionActions').style.display='none';$('calendarRangeEditor').hidden=true;
+ $('calendarSessionActions').style.display='none';$('calendarBackupActions').hidden=true;$('calendarRangeEditor').hidden=true;
  $('calendarEditToggle').setAttribute('aria-pressed','false');
  $('calendarEditToggle').setAttribute('aria-label','Режим редактирования календаря');
  $('accountEditToggle').hidden=true;$('accountEditPanel').hidden=true;
