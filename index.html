@@ -409,14 +409,28 @@ body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
  #budget .budget-date b{font-size:46px}
  #budget .budget-metric strong{font-size:17px}
 }
+
+/* Budget screen header styled like the supplied mobile Projects reference */
+body.budget-screen>.app>.top{display:none!important}
+body.budget-screen .app{padding-top:12px}
+#budget .budget-topbar{height:64px;display:grid;grid-template-columns:56px minmax(0,1fr) 56px;align-items:center;gap:10px;margin:0 0 18px}
+#budget .budget-topbar>strong{font-size:21px;font-weight:650;letter-spacing:-.035em;text-align:center;color:#171a1e}
+#budget .budget-top-action{appearance:none;width:52px;height:52px;border:0;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:#15181b;cursor:pointer}
+#budget .budget-top-action svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#budget .budget-more{gap:3px;flex-direction:column}
+#budget .budget-more span{display:block;width:3px;height:3px;border-radius:50%;background:#25282b}
+#budget .budget-summary{margin-top:18px}
 </style>
 </head>
 <body>
 <div class="app">
 <header class="top"><div class="brand"><b>NORDIC</b> <span>/ HABIT</span></div><div class="avatar" aria-hidden="true">✦</div></header>
 <section id="budget" class="tab-panel">
-<button type="button" class="section-back" data-open="dashboard" aria-label="Назад"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg></button>
-<div class="eyebrow">ЛИЧНЫЕ ФИНАНСЫ</div><h1>Бюджет</h1>
+<div class="budget-topbar">
+<button type="button" class="budget-top-action" data-open="dashboard" aria-label="Назад"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4-8 8 8 8"/></svg></button>
+<strong>Бюджет</strong>
+<button type="button" class="budget-top-action budget-more" aria-label="Дополнительные действия"><span></span><span></span><span></span></button>
+</div>
 <div class="budget-summary"><div><span>Доходы за месяц</span><strong id="budgetIncomeTotal">0</strong></div><div><span>Расходы за месяц</span><strong id="budgetExpenseTotal">0</strong></div><div><span>Итого</span><strong id="budgetNetTotal">0</strong></div></div>
 <div class="budget-monthbar"><button type="button" id="budgetPrevMonth" aria-label="Предыдущий месяц">‹</button><strong id="budgetMonthLabel"></strong><button type="button" id="budgetNextMonth" aria-label="Следующий месяц">›</button></div>
 <div id="budgetDays" class="budget-days"></div>
@@ -574,6 +588,7 @@ $('habitList').addEventListener('click',e=>{
 document.querySelectorAll('[data-open]').forEach(btn=>btn.addEventListener('click',()=>{
  const target=btn.dataset.open;
  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===target));
+ document.body.classList.toggle('budget-screen',target==='budget');
  window.scrollTo({top:0,behavior:'instant'});
  if(target==='budget')requestAnimationFrame(()=>requestAnimationFrame(()=>centerBudgetDay(budgetFocusedDate)));
 }));
