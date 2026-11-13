@@ -420,6 +420,39 @@ body.budget-screen .app{padding-top:12px}
 #budget .budget-more{gap:3px;flex-direction:column}
 #budget .budget-more span{display:block;width:3px;height:3px;border-radius:50%;background:#25282b}
 #budget .budget-summary{margin-top:18px}
+
+/* Nordic personal palette: oat, apricot, eucalyptus and graphite */
+body.budget-screen{
+ --bg:#f2f0e9;--paper:#fffdf8;--cream:#eee8dc;--ink:#30332e;--muted:#817f76;
+ --sage:#a6bba7;--sage-dark:#718b75;--sage-pale:#e5ece3;--line:#e8e2d7;
+ --shadow:0 8px 24px rgba(66,58,43,.065);
+ background:#f2f0e9!important;color:#30332e!important;
+}
+body.budget-screen .budget-top-action{background:#fffdf8;color:#343831;box-shadow:0 4px 14px rgba(66,58,43,.055)}
+body.budget-screen .budget-topbar>strong{color:#30332e}
+body.budget-screen .budget-summary>div{background:#fffdf8;border-color:#e8e2d7;box-shadow:0 4px 14px rgba(66,58,43,.035)}
+body.budget-screen #budgetIncomeTotal{color:#568363}
+body.budget-screen #budgetExpenseTotal{color:#c87569}
+body.budget-screen #budgetNetTotal{color:#45483f}
+body.budget-screen .budget-monthbar button{background:#fffdf8;border-color:#e5dfd4;color:#4d5148}
+body.budget-screen #budget .budget-day{background:linear-gradient(145deg,#fffdf8 0%,#f7f4ed 100%);border-color:#e6e0d5;box-shadow:0 5px 18px rgba(66,58,43,.035)}
+body.budget-screen #budget .budget-day:nth-of-type(3n+2):not(.is-centered){background:linear-gradient(145deg,#f0f3ec 0%,#e6ece4 100%);border-color:#dce5da}
+body.budget-screen #budget .budget-day:nth-of-type(3n):not(.is-centered){background:linear-gradient(145deg,#f5eee7 0%,#efe5db 100%);border-color:#eadfd4}
+body.budget-screen #budget .budget-day.is-centered{background:linear-gradient(145deg,#f8e5d6 0%,#f1d8c5 100%);border-color:#dfb99e;box-shadow:0 10px 26px rgba(157,111,77,.13)}
+body.budget-screen #budget .budget-date b{color:#373a33}
+body.budget-screen #budget .budget-date small{color:#777b70}
+body.budget-screen #budget .budget-metric small{color:#85877d}
+body.budget-screen #budget .budget-metric.income strong,body.budget-screen #budget .budget-entry.income strong{color:#4f825e}
+body.budget-screen #budget .budget-metric.expense strong,body.budget-screen #budget .budget-entry.expense strong{color:#bf6e64}
+body.budget-screen #budget .budget-day-body{border-top-color:rgba(133,119,99,.16)}
+body.budget-screen #budget .budget-add input{background:#fffdf8;border-color:#e6dfd3;color:#30332e}
+body.budget-screen #budget .budget-expense-btn{background:#c87569}
+body.budget-screen #budget .budget-income-btn{background:#718b75}
+body.budget-screen .dashboard-card.trading{background:linear-gradient(145deg,#f8faf5 0%,#e6eee5 100%);border-color:#dce6da}
+body.budget-screen .dashboard-card.budget{background:linear-gradient(145deg,#fff9f2 0%,#f3dfcf 100%);border-color:#ead8c9}
+body.budget-screen .dashboard-card.trading .dashboard-card-icon{background:#dce8dc;color:#66836a}
+body.budget-screen .dashboard-card.budget .dashboard-card-icon{background:#f0d2bc;color:#a56e4f}
+
 </style>
 </head>
 <body>
