@@ -240,6 +240,34 @@ body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 .dashboard-card.budget .dashboard-card-icon{background:#edf1e9;color:#73866a}
 .dashboard-card.budget{background:linear-gradient(145deg,#fff 0%,#f4f6f0 100%)}
 .section-back{border:0;background:transparent;color:#3979c9;font:650 13px inherit;padding:7px 0 14px;cursor:pointer}
+.budget-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:18px 0 16px}
+.budget-summary>div{min-width:0;padding:12px 9px;border:1px solid var(--line);border-radius:14px;background:var(--paper);display:flex;flex-direction:column;gap:7px}
+.budget-summary span{font-size:10px;color:var(--muted);line-height:1.25}
+.budget-summary strong{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+#budgetIncomeTotal{color:#39845a}#budgetExpenseTotal{color:#c65353}
+.budget-monthbar{display:flex;align-items:center;justify-content:space-between;margin:14px 0 10px;padding:0 4px}
+.budget-monthbar strong{text-transform:capitalize;font-size:16px}
+.budget-monthbar button{width:34px;height:34px;border:1px solid var(--line);border-radius:11px;background:var(--paper);font-size:23px;color:var(--ink);cursor:pointer}
+.budget-days{display:flex;flex-direction:column;gap:7px}
+.budget-day{border:1px solid var(--line);border-radius:14px;background:var(--paper);overflow:hidden}
+.budget-day-head{width:100%;border:0;background:transparent;padding:12px 11px;display:grid;grid-template-columns:42px minmax(0,1fr) minmax(0,1fr) 18px;gap:7px;align-items:center;text-align:left;cursor:pointer}
+.budget-date{font-size:14px;font-weight:750;color:var(--ink)}
+.budget-date small{display:block;font-size:9px;color:var(--muted);font-weight:500;margin-top:2px}
+.budget-income,.budget-expense{font-size:12px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.budget-income{color:#39845a}.budget-expense{color:#c65353}
+.budget-chevron{color:#9a9d96;font-size:16px;text-align:center}
+.budget-day-body{display:none;padding:0 11px 12px;border-top:1px solid #f0eee8}
+.budget-day.expanded .budget-day-body{display:block}
+.budget-entries{display:flex;flex-direction:column;gap:7px;padding:10px 0}
+.budget-entry{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px}
+.budget-entry span{min-width:0;overflow-wrap:anywhere}.budget-entry strong{white-space:nowrap;font-variant-numeric:tabular-nums}
+.budget-entry.income strong{color:#39845a}.budget-entry.expense strong{color:#c65353}
+.budget-empty{padding:13px 0;color:var(--muted);font-size:11px}
+.budget-add{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+.budget-add select,.budget-add input{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fffefa;color:var(--ink);font-size:12px}
+.budget-add .budget-description{grid-column:1/-1}
+.budget-add button{grid-column:1/-1;border:0;border-radius:10px;background:var(--sage-dark);color:white;padding:11px;font-size:12px;font-weight:700;cursor:pointer}
+
 #home>.date-row,#home>.progress-card,#home>.balance,#home>.section-head:not(.calendar-section-head),#home>.habits,#home>.hint{display:none!important}
 .calendar-section-head{margin:0 0 14px;padding:2px 2px}
 .calendar-section-head h2{font-size:22px;letter-spacing:-.035em}
@@ -335,7 +363,13 @@ body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 <body>
 <div class="app">
 <header class="top"><div class="brand"><b>NORDIC</b> <span>/ HABIT</span></div><div class="avatar" aria-hidden="true">✦</div></header>
-<section id="budget" class="tab-panel"><button type="button" class="section-back" data-open="dashboard">← Рабочий лист</button><div class="eyebrow">Личные финансы</div><h1>Бюджет</h1><div class="stat-card" style="margin-top:20px"><div class="stat-label">Новый раздел</div><div class="stat-number" style="font-size:18px">Бюджет и расходы</div><p class="profile-note">Здесь будет отдельный календарь бюджета, категории, доходы и траты. Пока оставил раздел пустым для следующих правок.</p></div></section>
+<section id="budget" class="tab-panel">
+<button type="button" class="section-back" data-open="dashboard">← Рабочий лист</button>
+<div class="eyebrow">ЛИЧНЫЕ ФИНАНСЫ</div><h1>Бюджет</h1>
+<div class="budget-summary"><div><span>Доходы за месяц</span><strong id="budgetIncomeTotal">0</strong></div><div><span>Расходы за месяц</span><strong id="budgetExpenseTotal">0</strong></div><div><span>Итого</span><strong id="budgetNetTotal">0</strong></div></div>
+<div class="budget-monthbar"><button type="button" id="budgetPrevMonth" aria-label="Предыдущий месяц">‹</button><strong id="budgetMonthLabel"></strong><button type="button" id="budgetNextMonth" aria-label="Следующий месяц">›</button></div>
+<div id="budgetDays" class="budget-days"></div>
+</section>
 <section id="dashboard" class="tab-panel active"><div class="dashboard-head"><div class="eyebrow">ТВОЁ ПРОСТРАНСТВО</div><h1>Рабочий лист</h1></div><div class="dashboard-grid"><button type="button" class="dashboard-card trading" data-open="home"><span class="dashboard-card-heading"><span class="dashboard-card-icon"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 3 8-9"/><path d="M15 5h6v6"/></svg></span><span class="dashboard-card-title">Трейдинг</span></span><span class="mini-calendar" id="miniTradingCalendar" aria-hidden="true"></span><span class="dashboard-card-subtitle">Открыть календарь →</span></button><button type="button" class="dashboard-card budget" data-open="budget"><span class="dashboard-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 9h18M7 15h3M7 2v3M17 2v3"/></svg></span><span><span class="dashboard-card-title">Бюджет</span><span class="dashboard-card-subtitle">Календарь, категории и расходы</span></span></button></div></section>
 <section id="home" class="tab-panel"><button type="button" class="section-back" data-open="dashboard">← Рабочий лист</button>
 <div class="date-row"><div><div class="eyebrow">Твой день</div><h1>Сегодня</h1></div><div class="date-label" id="todayDate"></div></div>
@@ -613,6 +647,45 @@ function renderMiniTradingCalendar(){
  }
  el.innerHTML=html;
 }
+const BUDGET_KEY='nordic-budget-v1';
+let budgetData={};try{budgetData=JSON.parse(localStorage.getItem(BUDGET_KEY))||{}}catch(e){budgetData={}}
+let budgetMonth=new Date();budgetMonth=new Date(budgetMonth.getFullYear(),budgetMonth.getMonth(),1);
+const saveBudget=()=>safeSetItem(BUDGET_KEY,JSON.stringify(budgetData));
+const budgetMoney=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n);
+const budgetDateKey=(y,m,d)=>y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+function renderBudget(){
+ const y=budgetMonth.getFullYear(),m=budgetMonth.getMonth(),days=new Date(y,m+1,0).getDate();
+ $('budgetMonthLabel').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(budgetMonth);
+ let incomeTotal=0,expenseTotal=0,out='';
+ for(let d=1;d<=days;d++){
+  const key=budgetDateKey(y,m,d),items=Array.isArray(budgetData[key])?budgetData[key]:[];
+  const inc=items.filter(x=>x.type==='income').reduce((a,x)=>a+(Number(x.amount)||0),0);
+  const exp=items.filter(x=>x.type==='expense').reduce((a,x)=>a+(Number(x.amount)||0),0);
+  incomeTotal+=inc;expenseTotal+=exp;
+  const weekday=new Date(y,m,d).toLocaleDateString('ru-RU',{weekday:'short'});
+  const entries=items.length?items.map((x,i)=>'<div class="budget-entry '+(x.type==='income'?'income':'expense')+'"><span>'+escapeBudgetText(x.title|| (x.type==='income'?'Доход':'Расход'))+'</span><strong>'+(x.type==='income'?'+':'−')+budgetMoney(Number(x.amount)||0)+'</strong></div>').join(''):'<div class="budget-empty">Пока нет записей за этот день</div>';
+  out+='<article class="budget-day" data-budget-day="'+key+'"><button type="button" class="budget-day-head" data-budget-toggle="'+key+'"><span class="budget-date">'+d+'<small>'+weekday+'</small></span><span class="budget-income">+'+budgetMoney(inc)+'</span><span class="budget-expense">−'+budgetMoney(exp)+'</span><span class="budget-chevron">⌄</span></button><div class="budget-day-body"><div class="budget-entries">'+entries+'</div><form class="budget-add" data-budget-form="'+key+'"><select name="type" aria-label="Тип операции"><option value="expense">Расход</option><option value="income">Доход</option></select><input name="amount" type="number" min="0.01" step="0.01" placeholder="Сумма" required><input class="budget-description" name="title" maxlength="80" placeholder="На что потратил / источник дохода" required><button type="submit">Добавить запись</button></form></div></article>';
+ }
+ $('budgetDays').innerHTML=out;
+ $('budgetIncomeTotal').textContent='+'+budgetMoney(incomeTotal);
+ $('budgetExpenseTotal').textContent='−'+budgetMoney(expenseTotal);
+ $('budgetNetTotal').textContent=(incomeTotal-expenseTotal>=0?'+':'−')+budgetMoney(Math.abs(incomeTotal-expenseTotal));
+}
+function escapeBudgetText(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+$('budgetPrevMonth').addEventListener('click',()=>{budgetMonth.setMonth(budgetMonth.getMonth()-1);renderBudget()});
+$('budgetNextMonth').addEventListener('click',()=>{budgetMonth.setMonth(budgetMonth.getMonth()+1);renderBudget()});
+$('budgetDays').addEventListener('click',e=>{const btn=e.target.closest('[data-budget-toggle]');if(!btn)return;const row=btn.closest('.budget-day');row.classList.toggle('expanded');});
+$('budgetDays').addEventListener('submit',e=>{
+ const form=e.target.closest('[data-budget-form]');if(!form)return;e.preventDefault();
+ const data=new FormData(form),type=data.get('type'),amount=Number(data.get('amount')),title=String(data.get('title')||'').trim(),key=form.dataset.budgetForm;
+ if(!title||!Number.isFinite(amount)||amount<=0){toast('Укажи описание и сумму');return}
+ if(!Array.isArray(budgetData[key]))budgetData[key]=[];
+ budgetData[key].push({type,amount,title,createdAt:new Date().toISOString()});
+ saveBudget();renderBudget();
+ const row=document.querySelector('[data-budget-day="'+key+'"]');if(row)row.classList.add('expanded');
+ toast(type==='income'?'Доход добавлен':'Расход добавлен');
+});
+renderBudget();
 function renderCalendar(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
  $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
