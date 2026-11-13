@@ -453,6 +453,25 @@ body.budget-screen .dashboard-card.budget{background:linear-gradient(145deg,#fff
 body.budget-screen .dashboard-card.trading .dashboard-card-icon{background:#dce8dc;color:#66836a}
 body.budget-screen .dashboard-card.budget .dashboard-card-icon{background:#f0d2bc;color:#a56e4f}
 
+
+/* Rotating day-card palette inspired by the reference: every date gets its own tone */
+#budget .budget-day:nth-of-type(6n+1){background:linear-gradient(145deg,#fffdf7 0%,#eee9dd 100%);border-color:#e5ddce}
+#budget .budget-day:nth-of-type(6n+2){background:linear-gradient(145deg,#f1f5b9 0%,#e4ec9a 100%);border-color:#dce58b}
+#budget .budget-day:nth-of-type(6n+3){background:linear-gradient(145deg,#dce5d8 0%,#c8d5c4 100%);border-color:#bdcdb8}
+#budget .budget-day:nth-of-type(6n+4){background:linear-gradient(145deg,#f4e2d8 0%,#e9cfc3 100%);border-color:#e2c4b6}
+#budget .budget-day:nth-of-type(6n+5){background:linear-gradient(145deg,#e5edf0 0%,#d2e0e5 100%);border-color:#c7d8df}
+#budget .budget-day:nth-of-type(6n){background:linear-gradient(145deg,#e9e4ef 0%,#d9d2e4 100%);border-color:#cec5dc}
+#budget .budget-day.is-centered{opacity:1;transform:scale(1);border-width:2px;box-shadow:0 12px 28px rgba(45,48,38,.14);filter:saturate(1.12)}
+#budget .budget-day:not(.is-centered){opacity:.72;transform:scale(.965);box-shadow:0 4px 12px rgba(45,48,38,.045)}
+#budget .budget-day .budget-date b{color:#30342e;text-shadow:0 1px 0 rgba(255,255,255,.28)}
+#budget .budget-day .budget-date small{color:#687064}
+#budget .budget-day .budget-metric small{color:#6e7469}
+#budget .budget-day .budget-metric.income strong{color:#286b45}
+#budget .budget-day .budget-metric.expense strong{color:#a94f47}
+#budget .budget-day.is-centered .budget-day-head{padding-top:18px;padding-bottom:18px}
+#budget .budget-day.is-centered .budget-date b{font-size:58px}
+@media(max-width:380px){#budget .budget-day.is-centered .budget-date b{font-size:50px}}
+
 </style>
 </head>
 <body>
