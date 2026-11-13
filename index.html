@@ -248,14 +248,26 @@ body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 .budget-monthbar{display:flex;align-items:center;justify-content:space-between;margin:14px 0 10px;padding:0 4px}
 .budget-monthbar strong{text-transform:capitalize;font-size:16px}
 .budget-monthbar button{width:34px;height:34px;border:1px solid var(--line);border-radius:11px;background:var(--paper);font-size:23px;color:var(--ink);cursor:pointer}
-.budget-days{display:flex;flex-direction:column;gap:9px;height:min(62vh,590px);min-height:390px;overflow-y:auto;overscroll-behavior:contain;scroll-snap-type:y mandatory;padding:calc((min(62vh,590px) - 94px)/2) 4px;scrollbar-width:none}
+.budget-days{height:min(68vh,620px);min-height:430px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;overscroll-behavior:contain;scroll-snap-type:y mandatory;padding:0 4px;scrollbar-width:none}
 .budget-days::-webkit-scrollbar{display:none}
-.budget-day{flex:0 0 auto;min-height:94px;scroll-snap-align:center;scroll-snap-stop:always;transition:transform .18s ease,opacity .18s ease,border-color .18s ease}
-.budget-day:not(.is-centered){opacity:.68;transform:scale(.97)}
-.budget-day.is-centered{opacity:1;transform:scale(1);border-color:var(--sage-dark);box-shadow:0 5px 18px rgba(50,70,48,.10)}
-.budget-day.is-centered .budget-day-head{padding-top:15px;padding-bottom:15px}
-.budget-day.is-centered .budget-date{font-size:19px}
-.budget-day.is-centered .budget-income,.budget-day.is-centered .budget-expense{font-size:13px}
+.budget-days:before,.budget-days:after{content:"";display:block;flex:0 0 calc((min(68vh,620px) - 210px)/2)}
+.budget-day{flex:0 0 210px;height:210px;min-height:210px;border:1px solid #e1e7e0;border-radius:24px;background:linear-gradient(145deg,#fff 0%,#f3f6f0 100%);overflow:hidden;opacity:.55;transform:scale(.96);scroll-snap-align:center;scroll-snap-stop:always;transition:transform .18s ease,opacity .18s ease,border-color .18s ease,box-shadow .18s ease}
+.budget-day.is-centered{opacity:1;transform:scale(1);border-color:#91a98f;box-shadow:0 8px 25px rgba(44,63,43,.12)}
+.budget-day-head{height:100%;min-height:208px;padding:18px 17px;grid-template-columns:92px minmax(0,1fr) 18px;gap:11px;align-items:center}
+.budget-date{display:flex;flex-direction:column;justify-content:center;gap:7px}
+.budget-date b{font-size:54px;line-height:1;font-weight:350;letter-spacing:-.07em;font-variant-numeric:tabular-nums;color:#343c35}
+.budget-date small{font-size:11px;color:#7f897f;text-transform:capitalize}
+.budget-day-metrics{display:flex;flex-direction:column;gap:17px;min-width:0}
+.budget-metric{display:flex;flex-direction:column;gap:5px;min-width:0}
+.budget-metric small{font-size:9px;letter-spacing:.1em;color:#929a91;font-weight:700}
+.budget-metric strong{font-size:20px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.budget-metric.income strong{color:#37875a}.budget-metric.expense strong{color:#c55454}
+.budget-chevron{align-self:start;margin-top:3px;font-size:17px}
+.budget-day-body{padding:0 16px 16px}
+.budget-day.expanded{height:auto;min-height:210px;flex-basis:auto;opacity:1;transform:none}
+.budget-day.expanded .budget-day-head{height:140px;min-height:140px}
+.budget-day.expanded .budget-date b{font-size:44px}
+@media(max-width:380px){.budget-day{flex-basis:190px;height:190px;min-height:190px}.budget-day-head{min-height:188px;grid-template-columns:78px minmax(0,1fr) 16px;padding:15px 13px;gap:8px}.budget-date b{font-size:46px}.budget-metric strong{font-size:17px}.budget-days:before,.budget-days:after{flex-basis:calc((min(68vh,620px) - 190px)/2)}}
 
 .budget-day{border:1px solid var(--line);border-radius:14px;background:var(--paper);overflow:hidden}
 .budget-day-head{width:100%;border:0;background:transparent;padding:12px 11px;display:grid;grid-template-columns:42px minmax(0,1fr) minmax(0,1fr) 18px;gap:7px;align-items:center;text-align:left;cursor:pointer}
@@ -367,6 +379,8 @@ body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 /* Ошибки: «Да» — красный, «Нет» — зелёный; рынок остаётся с обратной логикой. */
 .day-review-options button[data-review="hadErrors"][data-value="true"].active-yes{background:#f9e8e7;border-color:#dfa19d;color:#a84343}
 .day-review-options button[data-review="hadErrors"][data-value="false"].active-no{background:#e3f2e8;border-color:#8cbea0;color:#286548}
+
+/* Budget date wheel: active day stays centered, neighboring dates remain visible */
 </style>
 </head>
 <body>
@@ -533,6 +547,7 @@ document.querySelectorAll('[data-open]').forEach(btn=>btn.addEventListener('clic
  const target=btn.dataset.open;
  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===target));
  window.scrollTo({top:0,behavior:'instant'});
+ if(target==='budget')requestAnimationFrame(()=>requestAnimationFrame(()=>centerBudgetDay(budgetFocusedDate)));
 }));
 $('exportData').addEventListener('click',()=>{
  const blob=new Blob([JSON.stringify({habits:store,goals:plans,actualResults:actuals},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -662,6 +677,9 @@ let budgetMonth=new Date();budgetMonth=new Date(budgetMonth.getFullYear(),budget
 const saveBudget=()=>safeSetItem(BUDGET_KEY,JSON.stringify(budgetData));
 const budgetMoney=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n);
 const budgetDateKey=(y,m,d)=>y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+const budgetToday=new Date();
+let budgetFocusedDate=budgetDateKey(budgetMonth.getFullYear(),budgetMonth.getMonth(),budgetToday.getDate());
+function escapeBudgetText(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 function renderBudget(){
  const y=budgetMonth.getFullYear(),m=budgetMonth.getMonth(),days=new Date(y,m+1,0).getDate();
  $('budgetMonthLabel').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(budgetMonth);
@@ -671,35 +689,69 @@ function renderBudget(){
   const inc=items.filter(x=>x.type==='income').reduce((a,x)=>a+(Number(x.amount)||0),0);
   const exp=items.filter(x=>x.type==='expense').reduce((a,x)=>a+(Number(x.amount)||0),0);
   incomeTotal+=inc;expenseTotal+=exp;
-  const weekday=new Date(y,m,d).toLocaleDateString('ru-RU',{weekday:'short'});
-  const entries=items.length?items.map((x,i)=>'<div class="budget-entry '+(x.type==='income'?'income':'expense')+'"><span>'+escapeBudgetText(x.title|| (x.type==='income'?'Доход':'Расход'))+'</span><strong>'+(x.type==='income'?'+':'−')+budgetMoney(Number(x.amount)||0)+'</strong></div>').join(''):'<div class="budget-empty">Пока нет записей за этот день</div>';
-  out+='<article class="budget-day" data-budget-day="'+key+'"><button type="button" class="budget-day-head" data-budget-toggle="'+key+'"><span class="budget-date">'+d+'<small>'+weekday+'</small></span><span class="budget-income">+'+budgetMoney(inc)+'</span><span class="budget-expense">−'+budgetMoney(exp)+'</span><span class="budget-chevron">⌄</span></button><div class="budget-day-body"><div class="budget-entries">'+entries+'</div><form class="budget-add" data-budget-form="'+key+'"><input name="amount" type="number" min="0.01" step="0.01" placeholder="Сумма" required><input class="budget-description" name="title" maxlength="80" placeholder="Описание дохода или расхода" required><button type="submit" name="type" value="expense" class="budget-expense-btn">Добавить расход</button><button type="submit" name="type" value="income" class="budget-income-btn">Добавить доход</button></form></div></article>';
+  const weekday=new Date(y,m,d).toLocaleDateString('ru-RU',{weekday:'long'});
+  const entries=items.length?items.map(x=>'<div class="budget-entry '+(x.type==='income'?'income':'expense')+'"><span>'+escapeBudgetText(x.title||(x.type==='income'?'Доход':'Расход'))+'</span><strong>'+(x.type==='income'?'+':'−')+budgetMoney(Number(x.amount)||0)+'</strong></div>').join(''):'<div class="budget-empty">Пока нет записей за этот день</div>';
+  const dd=String(d).padStart(2,'0');
+  out+='<article class="budget-day" data-budget-day="'+key+'"><button type="button" class="budget-day-head" data-budget-toggle="'+key+'"><span class="budget-date"><b>'+dd+'</b><small>'+weekday+'</small></span><span class="budget-day-metrics"><span class="budget-metric income"><small>ДОХОД</small><strong>+'+budgetMoney(inc)+'</strong></span><span class="budget-metric expense"><small>РАСХОД</small><strong>−'+budgetMoney(exp)+'</strong></span></span><span class="budget-chevron">⌄</span></button><div class="budget-day-body"><div class="budget-entries">'+entries+'</div><form class="budget-add" data-budget-form="'+key+'"><input name="amount" type="number" min="0.01" step="0.01" placeholder="Сумма" required><input class="budget-description" name="title" maxlength="80" placeholder="Описание дохода или расхода" required><button type="submit" data-budget-type="expense" class="budget-expense-btn">Добавить расход</button><button type="submit" data-budget-type="income" class="budget-income-btn">Добавить доход</button></form></div></article>';
  }
  $('budgetDays').innerHTML=out;
- const wheel=$('budgetDays');wheel.querySelectorAll('.budget-day').forEach(row=>row.classList.remove('is-centered'));
  $('budgetIncomeTotal').textContent='+'+budgetMoney(incomeTotal);
  $('budgetExpenseTotal').textContent='−'+budgetMoney(expenseTotal);
  $('budgetNetTotal').textContent=(incomeTotal-expenseTotal>=0?'+':'−')+budgetMoney(Math.abs(incomeTotal-expenseTotal));
 }
-function escapeBudgetText(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
-$('budgetPrevMonth').addEventListener('click',()=>{budgetMonth.setMonth(budgetMonth.getMonth()-1);renderBudget();requestAnimationFrame(()=>{centerBudgetDay(budgetDateKey(budgetMonth.getFullYear(),budgetMonth.getMonth(),1));updateBudgetWheelCenter()})});
-$('budgetNextMonth').addEventListener('click',()=>{budgetMonth.setMonth(budgetMonth.getMonth()+1);renderBudget();requestAnimationFrame(()=>{const d=new Date(),day=budgetMonth.getFullYear()===d.getFullYear()&&budgetMonth.getMonth()===d.getMonth()?d.getDate():1;centerBudgetDay(budgetDateKey(budgetMonth.getFullYear(),budgetMonth.getMonth(),day));updateBudgetWheelCenter()})});
-$('budgetDays').addEventListener('click',e=>{const btn=e.target.closest('[data-budget-toggle]');if(!btn)return;const row=btn.closest('.budget-day');row.classList.toggle('expanded');});
+function centerBudgetDay(key,behavior){
+ const wheel=$('budgetDays'),row=wheel.querySelector('[data-budget-day="'+key+'"]');
+ if(!wheel||!row)return;
+ const wr=wheel.getBoundingClientRect(),rr=row.getBoundingClientRect();
+ const top=wheel.scrollTop+(rr.top-wr.top)-(wheel.clientHeight-row.offsetHeight)/2;
+ wheel.scrollTo({top:Math.max(0,top),behavior:behavior||'auto'});
+ updateBudgetWheelCenter();
+}
+function updateBudgetWheelCenter(){
+ const wheel=$('budgetDays');if(!wheel||!wheel.children.length)return;
+ const mid=wheel.getBoundingClientRect().top+wheel.clientHeight/2;
+ let best=null,dist=Infinity;
+ wheel.querySelectorAll('.budget-day').forEach(row=>{const r=row.getBoundingClientRect(),d=Math.abs(r.top+r.height/2-mid);if(d<dist){dist=d;best=row}});
+ wheel.querySelectorAll('.budget-day').forEach(row=>row.classList.toggle('is-centered',row===best));
+}
+let budgetWheelFrame=false;
+$('budgetDays').addEventListener('scroll',()=>{
+ if(budgetWheelFrame)return;budgetWheelFrame=true;
+ requestAnimationFrame(()=>{budgetWheelFrame=false;updateBudgetWheelCenter()});
+},{passive:true});
+$('budgetPrevMonth').addEventListener('click',()=>{
+ budgetMonth.setMonth(budgetMonth.getMonth()-1);
+ budgetFocusedDate=budgetDateKey(budgetMonth.getFullYear(),budgetMonth.getMonth(),1);
+ renderBudget();requestAnimationFrame(()=>centerBudgetDay(budgetFocusedDate));
+});
+$('budgetNextMonth').addEventListener('click',()=>{
+ budgetMonth.setMonth(budgetMonth.getMonth()+1);
+ const now=new Date(),day=budgetMonth.getFullYear()===now.getFullYear()&&budgetMonth.getMonth()===now.getMonth()?now.getDate():1;
+ budgetFocusedDate=budgetDateKey(budgetMonth.getFullYear(),budgetMonth.getMonth(),day);
+ renderBudget();requestAnimationFrame(()=>centerBudgetDay(budgetFocusedDate));
+});
+$('budgetDays').addEventListener('click',e=>{
+ const typeButton=e.target.closest('[data-budget-type]');
+ if(typeButton){const form=typeButton.closest('form');if(form)form.dataset.pendingType=typeButton.dataset.budgetType;return}
+ const btn=e.target.closest('[data-budget-toggle]');if(!btn)return;
+ const row=btn.closest('.budget-day'),key=row.dataset.budgetDay;
+ budgetFocusedDate=key;
+ if(!row.classList.contains('is-centered'))centerBudgetDay(key,'smooth');
+ row.classList.toggle('expanded');
+});
 $('budgetDays').addEventListener('submit',e=>{
- const form=e.target.closest('[data-budget-form]');if(!form)return;e.preventDefault();
- const data=new FormData(form),type=e.submitter?.value||'expense',amount=Number(data.get('amount')),title=String(data.get('title')||'').trim(),key=form.dataset.budgetForm;
+ const form=e.target.closest('[data-budget-form]');if(!form)return;
+ e.preventDefault();
+ const data=new FormData(form),type=(e.submitter&&e.submitter.dataset.budgetType)||form.dataset.pendingType||'expense';
+ const amount=Number(data.get('amount')),title=String(data.get('title')||'').trim(),key=form.dataset.budgetForm;
  if(!title||!Number.isFinite(amount)||amount<=0){toast('Укажи описание и сумму');return}
  if(!Array.isArray(budgetData[key]))budgetData[key]=[];
  budgetData[key].push({type,amount,title,createdAt:new Date().toISOString()});
- saveBudget();renderBudget();
- const row=document.querySelector('[data-budget-day="'+key+'"]');if(row)row.classList.add('expanded');
+ budgetFocusedDate=key;saveBudget();renderBudget();
+ requestAnimationFrame(()=>{centerBudgetDay(key);const row=$('budgetDays').querySelector('[data-budget-day="'+key+'"]');if(row)row.classList.add('expanded')});
  toast(type==='income'?'Доход добавлен':'Расход добавлен');
 });
 renderBudget();
-function centerBudgetDay(key){const wheel=$('budgetDays'),row=wheel.querySelector('[data-budget-day=\"'+key+'\"]');if(!row)return;row.scrollTop;wheel.scrollTo({top:row.offsetTop-wheel.offsetTop+(row.offsetHeight-wheel.clientHeight)/2,behavior:'instant'});row.classList.add('is-centered');}
-function updateBudgetWheelCenter(){const wheel=$('budgetDays');if(!wheel)return;const mid=wheel.getBoundingClientRect().top+wheel.clientHeight/2;let best=null,dist=Infinity;wheel.querySelectorAll('.budget-day').forEach(row=>{const r=row.getBoundingClientRect(),d=Math.abs(r.top+r.height/2-mid);if(d<dist){dist=d;best=row}});wheel.querySelectorAll('.budget-day').forEach(row=>row.classList.toggle('is-centered',row===best));}
-$('budgetDays').addEventListener('scroll',updateBudgetWheelCenter,{passive:true});
-requestAnimationFrame(()=>{const now=new Date();centerBudgetDay(budgetDateKey(budgetMonth.getFullYear(),budgetMonth.getMonth(),now.getDate()));updateBudgetWheelCenter()});
 function renderCalendar(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
  $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
