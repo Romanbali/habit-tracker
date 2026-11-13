@@ -248,7 +248,15 @@ body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 .budget-monthbar{display:flex;align-items:center;justify-content:space-between;margin:14px 0 10px;padding:0 4px}
 .budget-monthbar strong{text-transform:capitalize;font-size:16px}
 .budget-monthbar button{width:34px;height:34px;border:1px solid var(--line);border-radius:11px;background:var(--paper);font-size:23px;color:var(--ink);cursor:pointer}
-.budget-days{display:flex;flex-direction:column;gap:7px}
+.budget-days{display:flex;flex-direction:column;gap:9px;height:min(62vh,590px);min-height:390px;overflow-y:auto;overscroll-behavior:contain;scroll-snap-type:y mandatory;padding:calc((min(62vh,590px) - 94px)/2) 4px;scrollbar-width:none}
+.budget-days::-webkit-scrollbar{display:none}
+.budget-day{flex:0 0 auto;min-height:94px;scroll-snap-align:center;scroll-snap-stop:always;transition:transform .18s ease,opacity .18s ease,border-color .18s ease}
+.budget-day:not(.is-centered){opacity:.68;transform:scale(.97)}
+.budget-day.is-centered{opacity:1;transform:scale(1);border-color:var(--sage-dark);box-shadow:0 5px 18px rgba(50,70,48,.10)}
+.budget-day.is-centered .budget-day-head{padding-top:15px;padding-bottom:15px}
+.budget-day.is-centered .budget-date{font-size:19px}
+.budget-day.is-centered .budget-income,.budget-day.is-centered .budget-expense{font-size:13px}
+
 .budget-day{border:1px solid var(--line);border-radius:14px;background:var(--paper);overflow:hidden}
 .budget-day-head{width:100%;border:0;background:transparent;padding:12px 11px;display:grid;grid-template-columns:42px minmax(0,1fr) minmax(0,1fr) 18px;gap:7px;align-items:center;text-align:left;cursor:pointer}
 .budget-date{font-size:14px;font-weight:750;color:var(--ink)}
@@ -668,13 +676,14 @@ function renderBudget(){
   out+='<article class="budget-day" data-budget-day="'+key+'"><button type="button" class="budget-day-head" data-budget-toggle="'+key+'"><span class="budget-date">'+d+'<small>'+weekday+'</small></span><span class="budget-income">+'+budgetMoney(inc)+'</span><span class="budget-expense">−'+budgetMoney(exp)+'</span><span class="budget-chevron">⌄</span></button><div class="budget-day-body"><div class="budget-entries">'+entries+'</div><form class="budget-add" data-budget-form="'+key+'"><input name="amount" type="number" min="0.01" step="0.01" placeholder="Сумма" required><input class="budget-description" name="title" maxlength="80" placeholder="Описание дохода или расхода" required><button type="submit" name="type" value="expense" class="budget-expense-btn">Добавить расход</button><button type="submit" name="type" value="income" class="budget-income-btn">Добавить доход</button></form></div></article>';
  }
  $('budgetDays').innerHTML=out;
+ const wheel=$('budgetDays');wheel.querySelectorAll('.budget-day').forEach(row=>row.classList.remove('is-centered'));
  $('budgetIncomeTotal').textContent='+'+budgetMoney(incomeTotal);
  $('budgetExpenseTotal').textContent='−'+budgetMoney(expenseTotal);
  $('budgetNetTotal').textContent=(incomeTotal-expenseTotal>=0?'+':'−')+budgetMoney(Math.abs(incomeTotal-expenseTotal));
 }
 function escapeBudgetText(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
-$('budgetPrevMonth').addEventListener('click',()=>{budgetMonth.setMonth(budgetMonth.getMonth()-1);renderBudget()});
-$('budgetNextMonth').addEventListener('click',()=>{budgetMonth.setMonth(budgetMonth.getMonth()+1);renderBudget()});
+$('budgetPrevMonth').addEventListener('click',()=>{budgetMonth.setMonth(budgetMonth.getMonth()-1);renderBudget();requestAnimationFrame(()=>{centerBudgetDay(budgetDateKey(budgetMonth.getFullYear(),budgetMonth.getMonth(),1));updateBudgetWheelCenter()})});
+$('budgetNextMonth').addEventListener('click',()=>{budgetMonth.setMonth(budgetMonth.getMonth()+1);renderBudget();requestAnimationFrame(()=>{const d=new Date(),day=budgetMonth.getFullYear()===d.getFullYear()&&budgetMonth.getMonth()===d.getMonth()?d.getDate():1;centerBudgetDay(budgetDateKey(budgetMonth.getFullYear(),budgetMonth.getMonth(),day));updateBudgetWheelCenter()})});
 $('budgetDays').addEventListener('click',e=>{const btn=e.target.closest('[data-budget-toggle]');if(!btn)return;const row=btn.closest('.budget-day');row.classList.toggle('expanded');});
 $('budgetDays').addEventListener('submit',e=>{
  const form=e.target.closest('[data-budget-form]');if(!form)return;e.preventDefault();
@@ -687,6 +696,10 @@ $('budgetDays').addEventListener('submit',e=>{
  toast(type==='income'?'Доход добавлен':'Расход добавлен');
 });
 renderBudget();
+function centerBudgetDay(key){const wheel=$('budgetDays'),row=wheel.querySelector('[data-budget-day=\"'+key+'\"]');if(!row)return;row.scrollTop;wheel.scrollTo({top:row.offsetTop-wheel.offsetTop+(row.offsetHeight-wheel.clientHeight)/2,behavior:'instant'});row.classList.add('is-centered');}
+function updateBudgetWheelCenter(){const wheel=$('budgetDays');if(!wheel)return;const mid=wheel.getBoundingClientRect().top+wheel.clientHeight/2;let best=null,dist=Infinity;wheel.querySelectorAll('.budget-day').forEach(row=>{const r=row.getBoundingClientRect(),d=Math.abs(r.top+r.height/2-mid);if(d<dist){dist=d;best=row}});wheel.querySelectorAll('.budget-day').forEach(row=>row.classList.toggle('is-centered',row===best));}
+$('budgetDays').addEventListener('scroll',updateBudgetWheelCenter,{passive:true});
+requestAnimationFrame(()=>{const now=new Date();centerBudgetDay(budgetDateKey(budgetMonth.getFullYear(),budgetMonth.getMonth(),now.getDate()));updateBudgetWheelCenter()});
 function renderCalendar(){
  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),prefix=y+'-'+String(m+1).padStart(2,'0')+'-';
  $('calendarMonth').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(viewMonth);
