@@ -267,6 +267,7 @@ body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 .budget-add select,.budget-add input{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fffefa;color:var(--ink);font-size:12px}
 .budget-add .budget-description{grid-column:1/-1}
 .budget-add button{grid-column:1/-1;border:0;border-radius:10px;background:var(--sage-dark);color:white;padding:11px;font-size:12px;font-weight:700;cursor:pointer}
+.budget-add .budget-expense-btn{background:#c65353}.budget-add .budget-income-btn{background:#39845a}
 
 #home>.date-row,#home>.progress-card,#home>.balance,#home>.section-head:not(.calendar-section-head),#home>.habits,#home>.hint{display:none!important}
 .calendar-section-head{margin:0 0 14px;padding:2px 2px}
@@ -664,7 +665,7 @@ function renderBudget(){
   incomeTotal+=inc;expenseTotal+=exp;
   const weekday=new Date(y,m,d).toLocaleDateString('ru-RU',{weekday:'short'});
   const entries=items.length?items.map((x,i)=>'<div class="budget-entry '+(x.type==='income'?'income':'expense')+'"><span>'+escapeBudgetText(x.title|| (x.type==='income'?'Доход':'Расход'))+'</span><strong>'+(x.type==='income'?'+':'−')+budgetMoney(Number(x.amount)||0)+'</strong></div>').join(''):'<div class="budget-empty">Пока нет записей за этот день</div>';
-  out+='<article class="budget-day" data-budget-day="'+key+'"><button type="button" class="budget-day-head" data-budget-toggle="'+key+'"><span class="budget-date">'+d+'<small>'+weekday+'</small></span><span class="budget-income">+'+budgetMoney(inc)+'</span><span class="budget-expense">−'+budgetMoney(exp)+'</span><span class="budget-chevron">⌄</span></button><div class="budget-day-body"><div class="budget-entries">'+entries+'</div><form class="budget-add" data-budget-form="'+key+'"><select name="type" aria-label="Тип операции"><option value="expense">Расход</option><option value="income">Доход</option></select><input name="amount" type="number" min="0.01" step="0.01" placeholder="Сумма" required><input class="budget-description" name="title" maxlength="80" placeholder="На что потратил / источник дохода" required><button type="submit">Добавить запись</button></form></div></article>';
+  out+='<article class="budget-day" data-budget-day="'+key+'"><button type="button" class="budget-day-head" data-budget-toggle="'+key+'"><span class="budget-date">'+d+'<small>'+weekday+'</small></span><span class="budget-income">+'+budgetMoney(inc)+'</span><span class="budget-expense">−'+budgetMoney(exp)+'</span><span class="budget-chevron">⌄</span></button><div class="budget-day-body"><div class="budget-entries">'+entries+'</div><form class="budget-add" data-budget-form="'+key+'"><input name="amount" type="number" min="0.01" step="0.01" placeholder="Сумма" required><input class="budget-description" name="title" maxlength="80" placeholder="Описание дохода или расхода" required><button type="submit" name="type" value="expense" class="budget-expense-btn">Добавить расход</button><button type="submit" name="type" value="income" class="budget-income-btn">Добавить доход</button></form></div></article>';
  }
  $('budgetDays').innerHTML=out;
  $('budgetIncomeTotal').textContent='+'+budgetMoney(incomeTotal);
@@ -677,7 +678,7 @@ $('budgetNextMonth').addEventListener('click',()=>{budgetMonth.setMonth(budgetMo
 $('budgetDays').addEventListener('click',e=>{const btn=e.target.closest('[data-budget-toggle]');if(!btn)return;const row=btn.closest('.budget-day');row.classList.toggle('expanded');});
 $('budgetDays').addEventListener('submit',e=>{
  const form=e.target.closest('[data-budget-form]');if(!form)return;e.preventDefault();
- const data=new FormData(form),type=data.get('type'),amount=Number(data.get('amount')),title=String(data.get('title')||'').trim(),key=form.dataset.budgetForm;
+ const data=new FormData(form),type=e.submitter?.value||'expense',amount=Number(data.get('amount')),title=String(data.get('title')||'').trim(),key=form.dataset.budgetForm;
  if(!title||!Number.isFinite(amount)||amount<=0){toast('Укажи описание и сумму');return}
  if(!Array.isArray(budgetData[key]))budgetData[key]=[];
  budgetData[key].push({type,amount,title,createdAt:new Date().toISOString()});
